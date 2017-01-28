@@ -102,13 +102,14 @@ class CreateGamePageContainer extends Component {
         return (
             <div className="create-game">
                 <main>
-                    <div style={{ width: '100%', textAlign: 'left' }}>
+                    <div style={{ width: '100%', textAlign: 'left', position: 'relative ' }}>
                         <img
                             style={{
                                 display: 'inline-block',
                                 verticalAlign: 'middle',
                                 position: 'relative',
-                                bottom: '8px'
+                                bottom: '8px',
+                                marginRight: '40px'
                             }}
                             onClick={this.onGoBackClick}
                             title="Go back go menu"
@@ -127,7 +128,7 @@ class CreateGamePageContainer extends Component {
                         />
                     </div>
                     <Coverflow
-                        width={'90%'} height="300"
+                        width={'90%'} height="340"
                         displayQuantityOfSide={2}
                         navigation={false}
                         enableScroll={true}
