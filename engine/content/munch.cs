@@ -7,11 +7,6 @@ using System.Text.RegularExpressions;
 class Program
 {
     static int octaveShift = 0;
-    const double tempo = 100;
-    const double beatLengthMs = 60000 / tempo;
-    const double beatLengthS = 60 / tempo;
-    const double beatDivisionLengthS = beatLengthS / 4;
-    const double firstNoteStartS = 3.24324;
 
     static void PitchToStringAndFret(string p, out int s, out int f)
     {
@@ -39,6 +34,11 @@ class Program
 
     static void Main(string[] args)
     {
+        double tempo = args.Length > 0 ? double.Parse(args[0]) : 74;
+        double beatLengthMs = 60000 / tempo;
+        double beatLengthS = 60 / tempo;
+        double beatDivisionLengthS = beatLengthS / 4;
+        double firstNoteStartS = 3.24324;
         while (true)
         {
             var line = Console.ReadLine();
@@ -89,7 +89,7 @@ class Program
                         double duration = double.Parse(right);
                         duration -= (duration % beatDivisionLengthS);
                         duration /= beatLengthS;
-                        if (duration < 0.25)
+                        // if (duration < 0.25)
                             duration = 0.25;
                         Console.WriteLine($"    beats: {duration.ToString("F2")},");
                         continue;
