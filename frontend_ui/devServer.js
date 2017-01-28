@@ -5,7 +5,7 @@ const webpack = require('webpack')
 const webpackDevMiddleware = require('webpack-dev-middleware')
 const webpackHotMiddleware = require('webpack-hot-middleware')
 const app = express()
-const port = 3007
+const port = 3000
 const config = require('./webpack.config.js')
 const compiler = webpack(config)
 

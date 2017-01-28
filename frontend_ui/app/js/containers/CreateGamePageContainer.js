@@ -7,6 +7,8 @@ import Coverflow from 'react-coverflow'
 import cover1 from '../../assets/cover1.jpg'
 import cover2 from '../../assets/cover2.jpg'
 import { createRoom } from '../actions/rooms'
+import backArrow from '../../assets/back.png'
+import getLink from '../utils/getLink'
 
 const ALBUMS = [
     {
@@ -14,42 +16,72 @@ const ALBUMS = [
         src: cover1,
         songName: 'Babe',
         author: 'Justin Beiber',
-        alt: ''
+        alt: '',
+        instruments: [
+            'guitar',
+            'guitar',
+            'bass-guitar'
+        ]
     },
     {
         id: '1',
         src: cover2,
         songName: 'Babe',
         author: 'Justin Beiber',
-        alt: ''
+        alt: '',
+        instruments: [
+            'guitar',
+            'guitar',
+            'bass-guitar'
+        ]
     },
     {
-        id: '0',
+        id: '2',
         src: cover1,
         songName: 'Babe',
         author: 'Justin Beiber',
-        alt: ''
+        alt: '',
+        instruments: [
+            'guitar',
+            'guitar',
+            'bass-guitar'
+        ]
     },
     {
-        id: '1',
+        id: '3',
         src: cover2,
         songName: 'Babe',
         author: 'Justin Beiber',
-        alt: ''
+        alt: '',
+        instruments: [
+            'guitar',
+            'guitar',
+            'bass-guitar'
+        ]
     },
     {
-        id: '0',
+        id: '4',
         src: cover1,
         songName: 'Babe',
         author: 'Justin Beiber',
-        alt: ''
+        alt: '',
+        instruments: [
+            'guitar',
+            'guitar',
+            'bass-guitar'
+        ]
     },
     {
-        id: '1',
+        id: '5',
         src: cover2,
         songName: 'Babe',
         author: 'Justin Beiber',
-        alt: ''
+        alt: '',
+        instruments: [
+            'guitar',
+            'guitar',
+            'bass-guitar'
+        ]
     }
 ]
 
@@ -60,14 +92,40 @@ class CreateGamePageContainer extends Component {
         createRoom({ id })
     }
 
+    onGoBackClick = () => {
+        const { push } = this.props
+
+        push(getLink('home'))
+    }
+
     render() {
         return (
             <div className="create-game">
-                <main >
-                    <Search
-                        className="song-search"
-                        placeholder={'Search songs...'}
-                    />
+                <main>
+                    <div style={{ width: '100%', textAlign: 'left' }}>
+                        <img
+                            style={{
+                                display: 'inline-block',
+                                verticalAlign: 'middle',
+                                position: 'relative',
+                                bottom: '8px'
+                            }}
+                            onClick={this.onGoBackClick}
+                            title="Go back go menu"
+                            className="btn"
+                            src={backArrow}
+                            width="100px"
+                            height="50px"
+                        />
+                        <Search
+                            className="song-search"
+                            title="Search for songs"
+                            value={''}
+                            onButtonClick={() => {}}
+                            onInputChange={() => {}}
+                            placeholder={'Search songs...'}
+                        />
+                    </div>
                     <Coverflow
                         width={'90%'} height="300"
                         displayQuantityOfSide={2}

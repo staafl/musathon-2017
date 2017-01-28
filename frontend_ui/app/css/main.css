@@ -7,7 +7,6 @@ html, body {
     min-height: 100%;
     color: var(--main-white-text-color);
     background-color: var(--main-pink-color);
-    padding-top: 30px;
 }
 
 .main-app {
@@ -112,8 +111,11 @@ h1 {
 
 .create-game .form-group {
     position: relative;
+    top: 4px;
     width: 200px;
     background-color: var(--main-white-text-color);
+    display: inline-block;
+    vertical-align: middle;
 }
 
 .create-game {
@@ -150,4 +152,7 @@ ul.workflow > li:before {
 ul.workflow > li .fa {
     z-index:14;
     top: -35px;
+}
+
+.song-search {
 }
