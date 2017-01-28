@@ -19,12 +19,18 @@ class HomePageContainer extends Component {
                     <h1>{'Multisician'}</h1>
                 </header>
                 <main>
-                    <span>{'This is a game about Ivan. Lorem Upsum. Ivan is a dude. All hail Ivan!!!'}</span>
+                    <span>{'Това приложение ще ви позволи да тренирате своя усет към музиката, докато се забавлявате заедно с приятели. Достатъчно за да играете ще е само PC - настолен компютър или лаптоп. Ще можете да свирите на различни инструменти, заедно с вашите приятели или със случайни хора. Ще трябва да уцелите точната мелодия в такт и да не изпускате ритъма.'}</span>
+                    <br />
                     <Button
-                        className={'centered'}
                         onClick={this.onCreateButtonClick}
                     >
                         {'Create'}
+                    </Button>
+                    <br />
+                    <Button
+                        onClick={() => {}}
+                    >
+                        {'Join'}
                     </Button>
                 </main>
             </div>

@@ -97,6 +97,7 @@ h1 {
     display: block;
     width: 300px;
     margin-top: 50px;
+    display: inline-block;
 }
 
 .home .btn:hover {
@@ -110,8 +111,9 @@ h1 {
 }
 
 .create-game .form-group {
-    position: relative;
+    position: absolute;
     top: 4px;
+    right: 2px;
     width: 200px;
     background-color: var(--main-white-text-color);
     display: inline-block;
