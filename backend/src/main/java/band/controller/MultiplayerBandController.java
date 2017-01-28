@@ -1,10 +1,14 @@
 package band.controller;
 
 import band.domain.Room;
+import band.domain.RoomUpdated;
+import band.domain.UserJoinedToRoom;
 import band.service.MultiplayerBandService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.pcbsys.nirvana.client.nChannelAttributes;
-import com.pcbsys.nirvana.client.nSession;
+import com.pcbsys.nirvana.client.*;
+import com.pcbsys.nirvana.nAdminAPI.nACLEntry;
+import com.pcbsys.nirvana.nAdminAPI.nLeafNode;
+import com.pcbsys.nirvana.nAdminAPI.nRealmNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,6 +26,9 @@ public class MultiplayerBandController {
     @Autowired
     private nSession nsession;
 
+    @Autowired
+    private nRealmNode realmNode;
+
     @CrossOrigin
     @RequestMapping(value = "/rooms/{songId}", method = RequestMethod.POST, produces = "application/json; charset=utf-8")
     public Room createRoom(@PathVariable(name = "songId") String songId) throws Exception
@@ -31,24 +38,59 @@ public class MultiplayerBandController {
         nChannelAttributes channelAttributes = new nChannelAttributes("/room/" + room.id);
         nsession.createChannel(channelAttributes);
 
+        nLeafNode leafNode = null;
+
+        while (leafNode == null)
+        {
+            leafNode = (nLeafNode) realmNode.findNode("/room/" + room.id);
+        }
+
+        nACLEntry acl = leafNode.getACLs().find("Everyone");
+        acl.setFullPrivileges(true);
+        leafNode.addACLEntry(acl);
+
         return room;
     }
 
     @CrossOrigin
     @RequestMapping(value = "/rooms/{roomId}/join", produces = "application/json; charset=utf-8")
-    public Room joinRoom(@PathVariable(name = "roomId") String roomId)
+    public UserJoinedToRoom joinRoom(@PathVariable(name = "roomId") String roomId) throws Exception
     {
-        return service.joinRoom(roomId);
+        UserJoinedToRoom result = service.joinRoom(roomId);
+
+        RoomUpdated roomUpdated = new RoomUpdated();
+        roomUpdated.type = "joinedRoom";
+        roomUpdated.room = result.room;
+        String notification = mapper.writeValueAsString(roomUpdated);
+
+        nChannel channel = nsession.findChannel(new nChannelAttributes("/room/" + result.room.id));
+
+        nConsumeEvent event = nConsumeEventFactory.create("", notification.getBytes(), -1, false);
+        channel.publish(event);
+
+        return result;
     }
 
     @CrossOrigin
     @RequestMapping(value = "/rooms/{roomId}/instrument/{userId}/{instrument}", produces = "application/json; charset=utf-8")
-    public Room joinRoom(
+    public Room chooseInstrument(
             @PathVariable(name = "roomId") String roomId,
             @PathVariable(name = "userId") String userId,
-            @PathVariable(name = "instrument") String instrument)
+            @PathVariable(name = "instrument") String instrument) throws Exception
     {
-        return service.addInstrumentToRoom(roomId, userId, instrument);
+        Room result = service.addInstrumentToRoom(roomId, userId, instrument);
+
+        RoomUpdated roomUpdated = new RoomUpdated();
+        roomUpdated.type = "joinedRoom";
+        roomUpdated.room = result;
+        String notification = mapper.writeValueAsString(roomUpdated);
+
+        nChannel channel = nsession.findChannel(new nChannelAttributes("/room/" + result.id));
+
+        nConsumeEvent event = nConsumeEventFactory.create("", notification.getBytes(), -1, false);
+        channel.publish(event);
+
+        return result;
     }
 
     @ModelAttribute
