@@ -2,6 +2,7 @@ package band.service;
 
 import band.domain.BandMember;
 import band.domain.Room;
+import band.domain.UserJoinedToRoom;
 import band.state.ApplicationState;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,7 +30,7 @@ public class MultiplayerBandService {
         return room;
     }
 
-    public Room joinRoom(String roomId)
+    public UserJoinedToRoom joinRoom(String roomId)
     {
         Room room  = state.rooms.get(roomId);
         String id = null;
@@ -59,7 +60,11 @@ public class MultiplayerBandService {
         newMember.id = id;
         room.members.add(newMember);
 
-        return room;
+        UserJoinedToRoom result = new UserJoinedToRoom();
+        result.userId = id;
+        result.room = room;
+
+        return result;
     }
 
     public Room addInstrumentToRoom(String roomId, String userId, String instrument)
@@ -79,5 +84,29 @@ public class MultiplayerBandService {
         }
 
         return room;
+    }
+
+    public boolean memberReady(String roomId, String userId) {
+        boolean result = true;
+        Room room = state.rooms.get(roomId);
+
+        Iterator<BandMember> iterator = room.members.iterator();
+
+        while (iterator.hasNext())
+        {
+            BandMember member = iterator.next();
+
+            if (member.id.equals(userId))
+            {
+                member.ready = true;
+            }
+
+            if (member.ready == false)
+            {
+                result = false;
+            }
+        }
+
+        return result;
     }
 }

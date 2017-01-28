@@ -9,7 +9,7 @@ class HomePageContainer extends Component {
     onCreateButtonClick = () => {
         const { push } = this.props
 
-        push(getLink('create'))
+        push(getLink('chooseSong'))
     }
 
     render() {
@@ -19,12 +19,21 @@ class HomePageContainer extends Component {
                     <h1>{'Multisician'}</h1>
                 </header>
                 <main>
-                    <span>{'This is a game about Ivan. Lorem Upsum. Ivan is a dude. All hail Ivan!!!'}</span>
+                    <span>{'Това приложение ще ви позволи да тренирате своя усет към музиката, докато се забавлявате заедно с приятели. Достатъчно за да играете ще е само PC - настолен компютър или лаптоп. Ще можете да свирите на различни инструменти, заедно с вашите приятели или със случайни хора. Ще трябва да уцелите точната мелодия в такт и да не изпускате ритъма.'}</span>
+                    <br />
                     <Button
-                        className={'centered'}
+                        className="create-button"
                         onClick={this.onCreateButtonClick}
+                        title="Create New Room"
                     >
                         {'Create'}
+                    </Button>
+                    <br />
+                    <Button
+                        onClick={() => {}}
+                        title="Join Room"
+                    >
+                        {'Join'}
                     </Button>
                 </main>
             </div>

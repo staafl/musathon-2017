@@ -31,8 +31,10 @@ export const createRoot = (store = defaultStore, name = 'Root') => {
                         <Route path={getLink('')} component={App}>
                             <IndexRedirect to={getLink('home')} />
                             <Route path={getLink('home')} component={HomePageContainer} />
-                            <Route path={getLink('create')} component={CreateGamePageContainer} />
-                            <Route path={getLink('inviteFriends')} component={InviteFriendsPageContainer} />
+                            <Route path={getLink('chooseSong')} component={CreateGamePageContainer} />
+                            <Route path={getLink('room')} component={InviteFriendsPageContainer}>
+                                <Route path='*' />
+                            </Route>
                             <Route path='*' component={NotFound} />
                         </Route>
                     </Router>

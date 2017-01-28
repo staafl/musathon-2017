@@ -2,8 +2,8 @@ const getLink = key => {
     switch (key) {
         case ``:
         case `home`:
-        case 'create':
-        case 'inviteFriends':
+        case 'chooseSong':
+        case 'room':
             return `/${key}`
         default:
             return `badLink`

@@ -51,6 +51,9 @@ const services = servicesDesc.reduce((acc, service) => {
         if (method !== undefined) {
             newService.method = service.method || 'GET'
         }
+        if (url !== undefined) {
+            newService.url = url
+        }
 
         return new Promise((resolve, reject) => {
             axios(newService)
