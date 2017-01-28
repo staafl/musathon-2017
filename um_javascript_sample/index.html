@@ -1,0 +1,32 @@
+<html>
+	<head>
+		<script src="lib/nirvana.js"></script>
+		<script>		
+			var session = Nirvana.createSession({
+				realms : ["http://localhost:11000"],
+				applicationName : "MultiplayerBand"
+			});
+			
+			var channel = session.getChannel("/test/channel");
+			
+			session.start();
+			
+			channel.on(Nirvana.Observe.DATA, function(event){
+				console.log(event);
+			});
+			
+			channel.subscribe();
+			
+			function publishMessage()
+			{
+				var event = Nirvana.createEvent();
+				event.getDictionary().putString("testProperty", "FFFFF!!!");
+				
+				channel.publish(event);
+			}
+		</script>
+	</head>
+	<body>
+		<button id="publishButton" onclick="publishMessage();">Publish Message</button>
+	</body>
+</html>
