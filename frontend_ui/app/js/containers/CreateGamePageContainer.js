@@ -4,86 +4,10 @@ import { bindActionCreators } from 'redux'
 import { Img, Search } from '../components'
 import { push } from 'react-router-redux'
 import Coverflow from 'react-coverflow'
-import cover1 from '../../assets/cover1.jpg'
-import cover2 from '../../assets/cover2.jpg'
 import { createRoom } from '../actions/rooms'
 import backArrow from '../../assets/back.png'
 import getLink from '../utils/getLink'
-
-const ALBUMS = [
-    {
-        id: '0',
-        src: cover1,
-        songName: 'Babe',
-        author: 'Justin Beiber',
-        alt: '',
-        instruments: [
-            'guitar',
-            'guitar',
-            'bass-guitar'
-        ]
-    },
-    {
-        id: '1',
-        src: cover2,
-        songName: 'Babe',
-        author: 'Justin Beiber',
-        alt: '',
-        instruments: [
-            'guitar',
-            'guitar',
-            'bass-guitar'
-        ]
-    },
-    {
-        id: '2',
-        src: cover1,
-        songName: 'Babe',
-        author: 'Justin Beiber',
-        alt: '',
-        instruments: [
-            'guitar',
-            'guitar',
-            'bass-guitar'
-        ]
-    },
-    {
-        id: '3',
-        src: cover2,
-        songName: 'Babe',
-        author: 'Justin Beiber',
-        alt: '',
-        instruments: [
-            'guitar',
-            'guitar',
-            'bass-guitar'
-        ]
-    },
-    {
-        id: '4',
-        src: cover1,
-        songName: 'Babe',
-        author: 'Justin Beiber',
-        alt: '',
-        instruments: [
-            'guitar',
-            'guitar',
-            'bass-guitar'
-        ]
-    },
-    {
-        id: '5',
-        src: cover2,
-        songName: 'Babe',
-        author: 'Justin Beiber',
-        alt: '',
-        instruments: [
-            'guitar',
-            'guitar',
-            'bass-guitar'
-        ]
-    }
-]
+import { ALBUMS } from '../constants/global'
 
 class CreateGamePageContainer extends Component {
     onCreateButtonClickPartial = ({ id }) => () => {

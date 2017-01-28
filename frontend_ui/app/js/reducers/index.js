@@ -3,10 +3,12 @@ import loading, * as fromLoading from './loading'
 import routing, * as fromRouting from './routing'
 import actionsHistory from './actionsHistory'
 import { isTesting } from '../utils/utils'
+import rooms, * as fromRooms from './rooms'
 
 const allReducers = {
     loading,
-    routing
+    routing,
+    rooms
 }
 
 if (isTesting()) {
@@ -25,3 +27,9 @@ export const isLoadingSelector = (state, loader) => fromLoading.isLoadingSelecto
 export const routingPathnameSelector = state =>
     fromRouting.pathnameSelector(state.routing)
 /* routing selectors end */
+
+export const userIdSelector = state => fromRooms.userIdSelector(state.rooms)
+export const instrumentSelector = state => fromRooms.instrumentSelector(state.rooms)
+export const roomSelector = state => fromRooms.roomSelector(state.rooms)
+export const playersSelector = state => fromRooms.playersSelector(state.rooms)
+export const songSelector = state => fromRooms.songSelector(state.rooms)

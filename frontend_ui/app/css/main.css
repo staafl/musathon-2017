@@ -94,10 +94,13 @@ h1 {
 .home .btn {
     background-color: var(--main-pink-color);
     border: 1px solid white;
-    display: block;
+    margin-top: 20px;
     width: 300px;
-    margin-top: 50px;
     display: inline-block;
+}
+
+.home .create-button {
+    margin-top: 80px;
 }
 
 .home .btn:hover {

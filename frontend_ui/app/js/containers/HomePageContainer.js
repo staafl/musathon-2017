@@ -9,7 +9,7 @@ class HomePageContainer extends Component {
     onCreateButtonClick = () => {
         const { push } = this.props
 
-        push(getLink('create'))
+        push(getLink('chooseSong'))
     }
 
     render() {
@@ -22,13 +22,16 @@ class HomePageContainer extends Component {
                     <span>{'Това приложение ще ви позволи да тренирате своя усет към музиката, докато се забавлявате заедно с приятели. Достатъчно за да играете ще е само PC - настолен компютър или лаптоп. Ще можете да свирите на различни инструменти, заедно с вашите приятели или със случайни хора. Ще трябва да уцелите точната мелодия в такт и да не изпускате ритъма.'}</span>
                     <br />
                     <Button
+                        className="create-button"
                         onClick={this.onCreateButtonClick}
+                        title="Create New Room"
                     >
                         {'Create'}
                     </Button>
                     <br />
                     <Button
                         onClick={() => {}}
+                        title="Join Room"
                     >
                         {'Join'}
                     </Button>

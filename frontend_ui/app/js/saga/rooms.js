@@ -15,7 +15,7 @@ function* onCreateRoom({ payload: { id } }) {
         const data = yield call(createRoom, { data: { id } })
 
         console.info(data)
-        yield put(push(getLink('inviteFriends')))
+        yield put(push(`${getLink('room')}/${data.id}`))
     } catch (error) {
         yield call(handleSagaError, { error })
     } finally {
