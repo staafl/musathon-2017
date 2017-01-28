@@ -10,9 +10,14 @@ var game = new Phaser.Game(
         render: render
     });
 
+var beatIconWidth = 100;
 var beatWidth = 200;
 var startBeats = 2 * song.beatsPerMeasure;
-var totalBeats = (startBeats + song.duration) * song.tempo / 60;
+var totalBeatsIncludingStart = (startBeats + song.duration) * song.tempo / 60;
+// todo: move a bit faster
+var beatWidthAndPadding = beatWidth + 100;
+var updatesPerBeat = 100;
+var click;
 
 var guitarStringToY =
 {
@@ -27,7 +32,7 @@ var guitarStringToY =
 function preload() {
 
     /* TODO: base on tempo so quarter is always same */
-    game.world.setBounds(0, 0, totalBeats * beatWidth, screen.height);
+    game.world.setBounds(0, 0, totalBeatsIncludingStart * beatWidth, screen.height);
 
     game.load.image('sky', 'starfield.png');
     game.load.image('guitarString6', 'string6.PNG');
@@ -36,6 +41,7 @@ function preload() {
     game.load.image('currentBar', 'currentBar.png');
     game.load.image('measureBar', 'measureBar.png');
 
+    game.load.audio('woodclick', 'woodclick.ogg');
 }
 
 function addGuitarString(number) {
@@ -43,7 +49,7 @@ function addGuitarString(number) {
     var guitarString = game.add.tileSprite(
       0,
       guitarStringToY[number],
-      totalBeats * beatWidth,
+      totalBeatsIncludingStart * beatWidth,
       number > 3 ? 11 : 4,
       number > 3 ? 'guitarString6' : 'guitarString3');
 
@@ -108,10 +114,12 @@ function addGuitarString(number) {
 
 function create() {
 
+    click = game.add.audio('woodclick');
+
     game.add.tileSprite(
         0,
         0,
-        totalBeats * beatWidth,
+        totalBeatsIncludingStart * beatWidth,
         screen.height,
         'sky');
 
@@ -120,65 +128,65 @@ function create() {
     }
 
 
-    var time = startBeats;
-        
-    for (var bix in song.parts.guitar) {
+    time = 0;
 
-        var beat = song.parts.guitar[bix];
-
-        for (var nix in beat.notes) {
-
-            var note = beat.notes[nix];
-
-            if (!isNaN(note[0])) {
-                var noteSprite =
-                        game.add.sprite(
-                            time * (beatWidth + 5) + 20,
-                            guitarStringToY[note[0]] - 9,
-                            'qNote');
-                noteSprite.scale.setTo(beat.beats, 1);
-            }
-        }
-    }
-    
-    time = startBeats / 2;
-    
-    while (time < totalBeats) {
+    while (time < totalBeatsIncludingStart) {
 
         if (time % song.beatsPerMeasure == 0) {
             var measureBar =
                 game.add.sprite(
-                    time * (beatWidth + 5),
+                    time * beatWidthAndPadding,
                     guitarStringToY[1] + 1,
                     'measureBar');
         }
 
         time += 1;
     }
-    
+
+    for (var bix in song.parts.guitar) {
+
+        var item = song.parts.guitar[bix];
+
+        for (var nix in item.notes) {
+
+            var note = item.notes[nix];
+
+            if (!isNaN(note[0])) {
+                var noteSprite =
+                        game.add.sprite(
+                            (startBeats + item.startTime) * beatWidthAndPadding,
+                            guitarStringToY[note[0]] - 9,
+                            'qNote');
+                noteSprite.scale.setTo((beatWidth / beatIconWidth) * item.beats, 1);
+            }
+        }
+    }
+
     currentBar =
         game.add.sprite(
-            1 * (beatWidth + 5),
+            0,
             0,
             'currentBar');
-    
+
     currentBar.scale.setTo(2, 2);
+    var cycle = 0;
+    game.time.events.loop(
+        (60000 / song.tempo) /* duration of beat in ms */ / updatesPerBeat,
+        function() {
+            if (cycle % updatesPerBeat == 0 && click) {
+                setTimeout(function() {
+                    click.play();
+                }, 1);
+            }
+            game.camera.x += beatWidthAndPadding / updatesPerBeat;
+            if (currentBar)
+                currentBar.x = game.camera.x + beatWidthAndPadding;
+            cycle += 1;
+        },
+        true);
 }
 
 var currentBar;
-
-window.onload = function() {
-
-
-
-    setInterval(
-        function() {
-            game.camera.x += beatWidth / 100;
-            if (currentBar)
-            currentBar.x = game.camera.x + beatWidth + 5; 
-        },
-        10 * (60 / song.tempo));
-};
 
 function update() {
 
