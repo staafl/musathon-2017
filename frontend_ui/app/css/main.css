@@ -1,0 +1,153 @@
+html, body, #app {
+    height: 100%;
+}
+
+html, body {
+    margin: 0;
+    min-height: 100%;
+    color: var(--main-white-text-color);
+    background-color: var(--main-pink-color);
+    padding-top: 30px;
+}
+
+.main-app {
+    height: 100%;
+    padding: 10px 15px 0 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.not-found {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.button {
+    cursor: pointer;
+}
+
+.centered {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10001;
+}
+
+.invisible {
+    visibility: hidden;
+}
+
+.hidden {
+    display: none;
+}
+
+.main-wrapper {
+    height: 100%;
+}
+
+
+.main-app > main {
+    flex: 1 0 auto;
+}
+
+.nav {
+    user-select: none;
+    background-color: mediumpurple;
+}
+
+footer {
+    position: relative;
+    left: 50%;
+}
+
+.alert {
+    text-align: center;
+    font-size: 15px;
+    font-weight: 500;
+}
+
+.btn .spinner {
+    margin: 0;
+}
+
+.btn.btn-loading {
+    outline: 0;
+}
+
+.home header, main {
+    text-align: center;
+    margin-bottom: 50px;
+}
+
+h1 {
+    font-size: 56px;
+    font-weight: 700;
+    letter-spacing: 2px;
+}
+
+.home span {
+    font-size: 26px;
+}
+
+.home .btn {
+    background-color: var(--main-pink-color);
+    border: 1px solid white;
+    display: block;
+    width: 300px;
+    margin-top: 50px;
+}
+
+.home .btn:hover {
+    background-color: var(--main-white-text-color);
+    color: var(--main-pink-color);
+}
+
+.create-game header span {
+    left: 10%;
+    font-size: 26px;
+}
+
+.create-game .form-group {
+    position: relative;
+    width: 200px;
+    background-color: var(--main-white-text-color);
+}
+
+.create-game {
+    padding: 10px 50px;
+}
+
+.create-game .coverflow__container__1P-xE {
+    margin: 0;
+}
+
+.glyphicon {
+    margin-top: 2px;
+    top: 0;
+}
+
+ul.workflow {
+    width: 100%;
+    margin: 20px 0 30px;
+}
+ul.workflow > li {
+    color: whitesmoke;
+    width: 22%;
+    text-align: center;
+    z-index: 3;
+}
+ul.workflow > li::after {
+    z-index:1;
+    left: 0px;
+    right: -40px;
+}
+ul.workflow > li:before {
+    z-index:2;
+}
+ul.workflow > li .fa {
+    z-index:14;
+    top: -35px;
+}
