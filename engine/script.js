@@ -81,10 +81,13 @@ function addGuitarString(number) {
 
     switch (number) {
         case 1:
-            guitarString.scale.setTo(1, 0.60);
+            guitarString.scale.setTo(1, 0.40);
             break;
         case 2:
-            guitarString.scale.setTo(1, 0.80);
+            guitarString.scale.setTo(1, 0.50);
+            break;
+        case 3:
+            guitarString.scale.setTo(1, 0.60);
             break;
         case 4:
             guitarString.scale.setTo(1, 0.30);
