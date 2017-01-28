@@ -13,7 +13,7 @@ public class MultiplayerBandService {
     @Autowired
     private ApplicationState state;
 
-    public String createRoom(String songId)
+    public Room createRoom(String songId)
     {
         Room room = new Room();
         room.id = state.getRandomId();
@@ -26,7 +26,7 @@ public class MultiplayerBandService {
 
         state.rooms.put(room.id, room);
 
-        return room.id;
+        return room;
     }
 
     public Room joinRoom(String roomId)
