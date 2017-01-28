@@ -3,12 +3,12 @@ var song = {
   duration: 322, // seconds
   backingTrack: "songs/under-the-bridge.mp3",
   previewTrack: "preview/under-the-bridge-preview.mp3",
-  tempo: 34, // 69,
+  tempo: 60, // 69,
   beatsPerMeasure: 4,
   parts:
   {
     guitar: [
-      {
+            {
         startTime: 0,
         position: 3, // fret pos
         notes: [  // notes
@@ -21,7 +21,61 @@ var song = {
         backingNotes: [
         ],
         beats: 1  // duration (in beats)
-      }
+      },
+      {
+        startTime: 1,
+        position: 3, // fret pos
+        notes: [  // notes
+          [5, 5],
+        ],
+        backingNotes: [
+        ],
+        beats: 1  // duration (in beats)
+      },
+      {
+        startTime: 3,
+        position: 3, // fret pos
+        notes: [  // notes
+          [2, 3], // string, fret
+        ],
+        backingNotes: [
+        ],
+        beats: 0.5  // duration (in beats)
+      },
+      {
+        startTime: 4+0,
+        position: 3, // fret pos
+        notes: [  // notes
+          [2, 3], // string, fret
+          [5, 5],
+          ["slide", [4, 4], [4, 6]],
+          ["slide", [5, 5], [5, 7]],
+          ["hammer", [5, 5], [5, 7]],
+        ],
+        backingNotes: [
+        ],
+        beats: 1  // duration (in beats)
+      },
+      {
+        startTime: 4+1,
+        position: 3, // fret pos
+        notes: [  // notes
+          [5, 5],
+        ],
+        backingNotes: [
+        ],
+        beats: 1  // duration (in beats)
+      },
+      {
+        startTime: 4+3,
+        position: 3, // fret pos
+        notes: [  // notes
+          [2, 3], // string, fret
+        ],
+        backingNotes: [
+        ],
+        beats: 0.5  // duration (in beats)
+      },
     ],
     drums: [
 
