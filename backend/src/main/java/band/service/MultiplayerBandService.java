@@ -85,4 +85,28 @@ public class MultiplayerBandService {
 
         return room;
     }
+
+    public boolean memberReady(String roomId, String userId) {
+        boolean result = true;
+        Room room = state.rooms.get(roomId);
+
+        Iterator<BandMember> iterator = room.members.iterator();
+
+        while (iterator.hasNext())
+        {
+            BandMember member = iterator.next();
+
+            if (member.id.equals(userId))
+            {
+                member.ready = true;
+            }
+
+            if (member.ready == false)
+            {
+                result = false;
+            }
+        }
+
+        return result;
+    }
 }

@@ -1,6 +1,7 @@
 package band.controller;
 
 import band.domain.Room;
+import band.domain.RoomReady;
 import band.domain.RoomUpdated;
 import band.domain.UserJoinedToRoom;
 import band.service.MultiplayerBandService;
@@ -91,6 +92,28 @@ public class MultiplayerBandController {
         channel.publish(event);
 
         return result;
+    }
+
+    @CrossOrigin
+    @RequestMapping(value = "/rooms/{roomId}/ready/{userId}", produces = "application/json; charset=utf-8")
+    public void chooseInstrument(
+            @PathVariable(name = "roomId") String roomId,
+            @PathVariable(name = "userId") String userId) throws Exception
+    {
+        boolean allMembersReady = service.memberReady(roomId, userId);
+
+        if (allMembersReady)
+        {
+            RoomReady roomReady = new RoomReady();
+            roomReady.roomId = roomId;
+
+            String notification = mapper.writeValueAsString(roomReady);
+
+            nChannel channel = nsession.findChannel(new nChannelAttributes("/room/" + roomId));
+
+            nConsumeEvent event = nConsumeEventFactory.create("", notification.getBytes(), -1, false);
+            channel.publish(event);
+        }
     }
 
     @ModelAttribute
