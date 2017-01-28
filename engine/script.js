@@ -10,14 +10,18 @@ var game = new Phaser.Game(
         render: render
     });
 
+var instrument = "guitar";
 var beatIconWidth = 100;
 var beatWidth = 200;
-var startBeats = 2 * song.beatsPerMeasure;
+var startBeats = 0; // 2 * song.beatsPerMeasure;
 var totalBeatsIncludingStart = (startBeats + song.duration) * song.tempo / 60;
 // todo: move a bit faster
 var beatWidthAndPadding = beatWidth + 100;
 var updatesPerBeat = 100;
 var click;
+var currentBeat;
+var currentBar;
+var notes;
 
 var guitarStringToY =
 {
@@ -127,7 +131,6 @@ function create() {
         addGuitarString(ii + 1);
     }
 
-
     time = 0;
 
     while (time < totalBeatsIncludingStart) {
@@ -143,21 +146,24 @@ function create() {
         time += 1;
     }
 
-    for (var bix in song.parts.guitar) {
+    if (instrument = "guitar") {
+        var notes = [];
+        for (var bix in song.parts.guitar) {
 
-        var item = song.parts.guitar[bix];
+            var item = song.parts.guitar[bix];
 
-        for (var nix in item.notes) {
+            for (var nix in item.notes) {
 
-            var note = item.notes[nix];
+                var note = item.notes[nix];
 
-            if (!isNaN(note[0])) {
-                var noteSprite =
-                        game.add.sprite(
-                            (startBeats + item.startTime) * beatWidthAndPadding,
-                            guitarStringToY[note[0]] - 9,
-                            'qNote');
-                noteSprite.scale.setTo((beatWidth / beatIconWidth) * item.beats, 1);
+                if (!isNaN(note[0])) {
+                    var noteSprite =
+                            game.add.sprite(
+                                (startBeats + item.startTime) * beatWidthAndPadding,
+                                guitarStringToY[note[0]] - 9,
+                                'qNote');
+                    noteSprite.scale.setTo((beatWidth / beatIconWidth) * item.beats, 1);
+                }
             }
         }
     }
@@ -170,13 +176,13 @@ function create() {
 
     currentBar.scale.setTo(2, 2);
     var cycle = 0;
+    currentBeat = -1;
     game.time.events.loop(
         (60000 / song.tempo) /* duration of beat in ms */ / updatesPerBeat,
         function() {
-            if (cycle % updatesPerBeat == 0 && click) {
-                setTimeout(function() {
-                    click.play();
-                }, 1);
+            if (cycle % updatesPerBeat == 0) {
+                currentBeat += 1;
+                setTimeout(onBeat, 1);
             }
             game.camera.x += beatWidthAndPadding / updatesPerBeat;
             if (currentBar)
@@ -186,7 +192,11 @@ function create() {
         true);
 }
 
-var currentBar;
+function onBeat() 
+{
+    click.play();
+    
+}
 
 function update() {
 
