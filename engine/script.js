@@ -17,7 +17,6 @@ var startBeats = 1 * song.beatsPerMeasure;
 var totalBeatsIncludingStart = (startBeats + song.duration) * song.tempo / 60;
 var beatWidthAndPadding = beatWidth + 50;
 var totalWidth = (1 + totalBeatsIncludingStart) * beatWidthAndPadding;
-// todo: move a bit faster
 var updatesPerBeat = 100;
 var click;
 var currentBeat;
@@ -25,6 +24,7 @@ var currentBar;
 var notes;
 var playItems = {};
 var sounds = {};
+var defaultOctaveShift = -1;
 
 var guitarStringToY =
 {
@@ -36,6 +36,18 @@ var guitarStringToY =
     6: 570
 };
 
+function pitchToStringAndFret(p)
+{
+    for (var ii = 1; ii <= 6; ++ii) {
+        for (var f = 0; f <= 5; ++f) {
+            if (stringAndFretToPitch(ii, f) == p) {
+                return [ii, f];
+            }
+        }
+    }
+    return null;
+}
+
 function stringAndFretToPitch(s, f, a)
 {
     var notes = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B']
@@ -43,7 +55,7 @@ function stringAndFretToPitch(s, f, a)
     var stringOctave = [4, 3, 3, 3, 2, 2];
     var indexOf = notes.indexOf(strings[s - 1]);
     var toReturn = notes[(indexOf + f) % notes.length];
-    toReturn += (stringOctave[s-1] + Math.floor((f + indexOf) / 12) + (a || 0));
+    toReturn += (stringOctave[s-1] + Math.floor((f + indexOf) / 12) + (a || defaultOctaveShift));
     return toReturn;
 }
 
@@ -60,6 +72,7 @@ function preload() {
 
     game.load.audio('woodclick', 'resources/woodclick.ogg');
 
+    // todo: slip loading samples we won't need
     if (instrument = "guitar") {
         for (var s = 1; s <= 6; ++s) {
             for (var f = 0; f <= 5; ++f) {
@@ -142,21 +155,16 @@ function create() {
 
     if (instrument = "guitar") {
         for (var bix in song.parts.guitar) {
-
             var item = song.parts.guitar[bix];
-            playItems[item.startTime] = item;
-            for (var nix in item.notes) {
-
-                var note = item.notes[nix];
-
-                if (!isNaN(note[0])) {
-                    var noteSprite =
-                            game.add.sprite(
-                                (1 + startBeats + item.startTime) * beatWidthAndPadding,
-                                guitarStringToY[note[0]] - 9,
-                                'qNote');
-                    noteSprite.scale.setTo((beatWidth / beatIconWidth) * item.beats, 1);
-                }
+            playItems[item.time] = item;
+            if (!isNaN(item.note[0]) &&
+                !item.isBacking) {
+                var noteSprite =
+                        game.add.sprite(
+                            (1 + startBeats + item.time) * beatWidthAndPadding,
+                            guitarStringToY[item.note[0]] - 9,
+                            'qNote');
+                noteSprite.scale.setTo((beatWidth / beatIconWidth) * item.beats, 1);
             }
         }
     }
@@ -180,6 +188,7 @@ function create() {
                 mod == updatesPerBeat / 2 ||
                 mod == 3*updatesPerBeat / 4) {
                 currentBeat += 0.25;
+                // whyyyy does the sound come 250 ms too early?
                 setTimeout(onBeat, 250);
             }
             game.camera.x += beatWidthAndPadding / updatesPerBeat;
@@ -188,25 +197,23 @@ function create() {
             cycle += 1;
         },
         (60000 / song.tempo) /* duration of beat in ms */ / updatesPerBeat);
-        
+
         //true);
 }
 
 function onBeat()
 {
-    console.log("currentBeat: " + currentBeat);
+    // console.log("currentBeat: " + currentBeat);
     if (currentBeat % 1 == 0) {
         click.play();
     }
     // console.log("currentBeat: " + currentBeat);
     var playItem = playItems[currentBeat];
     if (playItem) {
-        for (var jj = 0; jj < playItem.notes.length; ++jj) {
-            var note = playItem.notes[jj];
+            var note = playItem.note;
             var name = stringAndFretToPitch(note[0], note[1], -1);
             console.log(name);
             sounds["guitar"][name].play();
-        }
     }
 
 }
