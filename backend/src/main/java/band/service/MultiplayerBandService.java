@@ -61,4 +61,23 @@ public class MultiplayerBandService {
 
         return room;
     }
+
+    public Room addInstrumentToRoom(String roomId, String userId, String instrument)
+    {
+        Room room = state.rooms.get(roomId);
+
+        Iterator<BandMember> iterator = room.members.iterator();
+
+        while (iterator.hasNext())
+        {
+            BandMember member = iterator.next();
+
+            if (member.id.equals(userId))
+            {
+                member.instrument = instrument;
+            }
+        }
+
+        return room;
+    }
 }

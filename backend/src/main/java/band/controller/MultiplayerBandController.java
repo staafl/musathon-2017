@@ -28,4 +28,13 @@ public class MultiplayerBandController {
     {
         return service.joinRoom(roomId);
     }
+
+    @RequestMapping(value = "/rooms/{roomId}/instrument/{userId}/{instrument}")
+    public Room joinRoom(
+            @PathVariable(name = "roomId") String roomId,
+            @PathVariable(name = "userId") String userId,
+            @PathVariable(name = "instrument") String instrument)
+    {
+        return service.addInstrumentToRoom(roomId, userId, instrument);
+    }
 }
