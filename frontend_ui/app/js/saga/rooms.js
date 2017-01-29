@@ -1,6 +1,6 @@
 import { takeLatest } from 'redux-saga'
 import { call, put } from 'redux-saga/effects'
-import { CREATE_ROOM, JOIN_ROOM, CHOOSE_INSTRUMENT } from '../constants/rooms'
+import { CREATE_ROOM, JOIN_ROOM, CHOOSE_INSTRUMENT, ROOM_READY } from '../constants/rooms'
 import {
     setUserId,
     setRoomId,
@@ -79,6 +79,17 @@ function* onChooseRoom({ payload: { room, userId, instrumentId } }) {
     }
 }
 
+function* onRoomReady({ payload: { room, userId } }) {
+    try {
+        yield put(startLoading({ loader: CREATE_ROOM_IS_LOADING }))
+        yield call(createRoom, { data: { id: `${room}/ready/${userId}` } })
+    } catch (error) {
+        yield call(handleSagaError, { error })
+    } finally {
+        yield put(stopLoading({ loader: CREATE_ROOM_IS_LOADING }))
+    }
+}
+
 function* watchCreateRoom() {
     yield* takeLatest(CREATE_ROOM, onCreateRoom)
 }
@@ -91,10 +102,15 @@ function* watchChooseRoom() {
     yield* takeLatest(CHOOSE_INSTRUMENT, onChooseRoom)
 }
 
+function* watchRoomReady() {
+    yield* takeLatest(ROOM_READY, onRoomReady)
+}
+
 export default function* roomSaga() {
     yield [
         watchCreateRoom(),
         watchJoinRoom(),
-        watchChooseRoom()
+        watchChooseRoom(),
+        watchRoomReady()
     ]
 }
