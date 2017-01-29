@@ -40,7 +40,7 @@ var instrument = QueryString["instrument"] || "guitar";
 var beatIconWidth = 100;
 var beatWidth = 200;
 // DEBUG var startBeats = 0; // 1 * song.beatsPerMeasure;
-var startBeats = 0; // 1 * song.beatsPerMeasure;
+var startBeats = 1 * song.beatsPerMeasure;
 var totalBeatsIncludingStart = (startBeats + song.duration) * song.tempo / 60;
 var beatWidthAndPadding = 256;
 var totalWidth = (1 + totalBeatsIncludingStart) * beatWidthAndPadding + 2*screen.width;
@@ -57,7 +57,7 @@ var octaveShiftSamples = -1;
 var octaveShiftInput = 0;
 var currentPosition = 0;
 var allPitches = {};
-var bufferDelay = 10;
+var bufferDelay = 7;
 var keyboard =
     [
         [Phaser.Keyboard.ONE,Phaser.Keyboard.Q,Phaser.Keyboard.A,Phaser.Keyboard.Z],
@@ -107,7 +107,7 @@ var channelName = "/room/" + (QueryString["room"] || "Default");
 subscribe(channelName, function(event) {
 	message = JSON.parse(event.getData());
 	
-	if (message.type === "play")
+	if (message.type === "play" && message.instrument != instrument)
 	{
 		sounds[message.instrument][message.name].play();
 	}
@@ -246,11 +246,14 @@ function addGuitarString(number) {
 function handleKey(s, f) {
     // console.log(name);
     // console.log("Key: " + JSON.stringify([s, currentPosition + f, currentTime]));
-    keyBuffer.push([s, currentPosition + f, currentTime]);
-    var name = stringAndFretToPitch(s, currentPosition + f, octaveShiftSamples);
-    sounds[instrument][name].play();
-	publishMessage(channelName, {type: "play", instrument: instrument, name: name});
-    matchBuffers();
+    setTimeout(function() {
+        keyBuffer.push([s, currentPosition + f, currentTime]);
+        var name = stringAndFretToPitch(s, currentPosition + f, octaveShiftSamples);
+        sounds[instrument][name].play();
+        console.log("Playing " + name);
+        publishMessage(channelName, {type: "play", instrument: instrument, name: name});
+        matchBuffers();
+    }, 150);
 }
 
 function create() {
@@ -472,7 +475,12 @@ function create() {
                             })();
                         }
                         if (!playItem.isBacking) {
-                            currentPosition = playItem.position || currentPosition;
+                            var newcurrentPosition = playItem.position || currentPosition;
+                            if (newcurrentPosition != currentPosition)
+                            {
+                                currentPosition = newcurrentPosition;
+                                console.log("Position: " + currentPosition);
+                            }
                             // console.log("Reached " + JSON.stringify(playItem));
 
                             /*game.add.sprite(
