@@ -35,9 +35,10 @@ class Program
     static void Main(string[] args)
     {
         double tempo = args.Length > 0 ? double.Parse(args[0]) : 74;
+        int beatDivisions = args.Length > 1 ? int.Parse(args[1]) : 16;
         double beatLengthMs = 60000 / tempo;
         double beatLengthS = 60 / tempo;
-        double beatDivisionLengthS = beatLengthS / 4;
+        double beatDivisionLengthS = beatLengthS / beatDivisions;
         double firstNoteStartS = 3.24324;
         while (true)
         {
@@ -72,7 +73,7 @@ class Program
                     {
                         int fret, s;
                         PitchToStringAndFret(right, out s, out fret);
-                        Console.WriteLine($"    note: [{s}, {fret}],");
+                        Console.WriteLine($"    note: [{s}, {fret}], // " + line.Trim());
                         continue;
                     }
                     if (left == "time")
@@ -81,7 +82,8 @@ class Program
                         time -= firstNoteStartS;
                         time -= (time % beatDivisionLengthS);
                         time /= beatLengthS;
-                        Console.WriteLine($"    time: {time.ToString("F2")},");
+                        time *= beatDivisions;
+                        Console.WriteLine($"    time: {time.ToString()}, // " + line.Trim());
                         continue;
                     }
                     if (left == "duration")
@@ -91,7 +93,7 @@ class Program
                         duration /= beatLengthS;
                         // if (duration < 0.25)
                             duration = 0.25;
-                        Console.WriteLine($"    beats: {duration.ToString("F2")},");
+                        Console.WriteLine($"    beats: {duration.ToString()}, // " + line.Trim());
                         continue;
                     }
                 }

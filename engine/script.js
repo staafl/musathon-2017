@@ -12,12 +12,13 @@ var game = new Phaser.Game(
 
 var instrument = "guitar";
 var beatIconWidth = 100;
-var beatWidth = 150;
+var beatWidth = 100;
 var startBeats = 1 * song.beatsPerMeasure;
 var totalBeatsIncludingStart = (startBeats + song.duration) * song.tempo / 60;
-var beatWidthAndPadding = beatWidth + 50;
+var beatWidthAndPadding = 128;
 var totalWidth = (1 + totalBeatsIncludingStart) * beatWidthAndPadding;
-var updatesPerBeat = 100;
+var updatesPerBeat = 128;
+var beatDivisions = 16;
 var click;
 var currentBeat;
 var currentBar;
@@ -160,10 +161,10 @@ function create() {
             if (!isNaN(item.note[0]) &&
                 !item.isBacking) {
                 var noteSprite =
-                        game.add.sprite(
-                            (1 + startBeats + item.time) * beatWidthAndPadding,
-                            guitarStringToY[item.note[0]] - 9,
-                            'qNote');
+                    game.add.sprite(
+                        (1 + startBeats + item.time / beatDivisions) * beatWidthAndPadding,
+                        guitarStringToY[item.note[0]] - 9,
+                        'qNote');
                 noteSprite.scale.setTo((beatWidth / beatIconWidth) * item.beats, 1);
             }
         }
@@ -176,20 +177,28 @@ function create() {
             'currentBar');
 
     currentBar.scale.setTo(2, 2);
-    var cycle = 0;
     currentBeat = -startBeats;
     //game.time.events.loop(
         //(60000 / song.tempo) /* duration of beat in ms */ / (2 * updatesPerBeat));
     setInterval(
         function() {
             var mod = cycle % updatesPerBeat;
-            if (mod == 0 ||
-                mod == updatesPerBeat / 4 ||
-                mod == updatesPerBeat / 2 ||
-                mod == 3*updatesPerBeat / 4) {
-                currentBeat += 0.25;
-                // whyyyy does the sound come 250 ms too early?
-                setTimeout(onBeat, 250);
+            if (mod % updatesPerBeat == 0) {
+                currentBeat += 1;
+                setTimeout(onBeat, 0);
+            }
+            if (mod % (updatesPerBeat / beatDivisions) == 0) {
+                
+                var playItem = playItems[cycle / beatDivisions];
+                if (playItem) {
+                    setTimeout(function() {
+                        var note = playItem.note;
+                        var name = stringAndFretToPitch(note[0], note[1], -1);
+                        console.log(name);
+                        sounds["guitar"][name].play();
+                    }, 0);
+                }
+                
             }
             game.camera.x += beatWidthAndPadding / updatesPerBeat;
             if (currentBar)
@@ -200,22 +209,14 @@ function create() {
 
         //true);
 }
+var cycle = 0;
 
 function onBeat()
 {
-    // console.log("currentBeat: " + currentBeat);
+    console.log("currentBeat: " + currentBeat);
     if (currentBeat % 1 == 0) {
         click.play();
     }
-    // console.log("currentBeat: " + currentBeat);
-    var playItem = playItems[currentBeat];
-    if (playItem) {
-            var note = playItem.note;
-            var name = stringAndFretToPitch(note[0], note[1], -1);
-            console.log(name);
-            sounds["guitar"][name].play();
-    }
-
 }
 
 function update() {
