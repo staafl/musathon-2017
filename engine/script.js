@@ -110,6 +110,65 @@ subscribe(channelName, function(event) {
 	if (message.type === "play" && message.instrument != instrument)
 	{
 		sounds[message.instrument][message.name].play();
+	} else if (message.type === "trackStart")
+	{
+		setInterval(
+        function() {
+            var mod = cycle % updatesPerBeat;
+            if (mod % updatesPerBeat == 0) {
+                currentBeat += 1;
+                // console.log("currentBeat: " + currentBeat);
+                setTimeout(onBeat, 0);
+            }
+            if (mod % (updatesPerBeat / beatDivisions) == 0) {
+
+                  currentTime = cycle / (updatesPerBeat / beatDivisions) - beatDivisions*startBeats;
+//console.log("current time: " + currentTime);
+
+                  var playItemsNow = playItems[currentTime];
+                  if (playItemsNow) {
+                      // console.log(playItemsNow);
+                      for (var ii = 0; ii < playItemsNow.length; ++ii) {
+                        var playItem = playItemsNow[ii];
+                        // console.log("Expected key: " + playItem.expectedKey);
+                        if (playItem.isBacking)
+                        {
+                            (function() {
+                                var inst = playItem.instrument;
+                                var ss = playItem.note[0];
+                                var ff = playItem.note[1];
+                                setTimeout(function() {
+                                    var name = stringAndFretToPitch(ss, ff, octaveShiftSamples);
+                                    //console.log("Playing backing " + name);
+                                    sounds[inst][name].play();
+                                }, 0);
+                            })();
+                        }
+                        if (!playItem.isBacking) {
+                            currentPosition = playItem.position || currentPosition;
+                            // console.log("Reached " + JSON.stringify(playItem));
+
+                            /*game.add.sprite(
+                                playItem.sprite.x,
+                                guitarStringToY[item.note[0]] - 9,
+                                'qNote');*/
+                            var notesArray = [playItem.note[0], playItem.note[1], currentTime]
+
+                            if (playItem.sprite !== undefined) {
+                                notesArray.push(playItem.sprite)
+                            }
+                            noteBuffer.push(notesArray);
+                        }
+                      }
+                  }
+                  matchBuffers();
+            }
+            game.camera.x += beatWidthAndPadding / updatesPerBeat;
+            if (currentBar)
+                currentBar.x = game.camera.x + beatWidthAndPadding;
+            cycle += 1;
+        },
+        (60000 / song.tempo) /* duration of beat in ms */ / updatesPerBeat);
 	}
 });
 
@@ -442,7 +501,10 @@ function create() {
     // currentBeat = 0; // TODO: -startBeats-1;
     //game.time.events.loop(
         //(60000 / song.tempo) /* duration of beat in ms */ / (2 * updatesPerBeat));
-    setInterval(
+
+    if (!QueryString["room"])
+	{
+		setInterval(
         function() {
             var mod = cycle % updatesPerBeat;
             if (mod % updatesPerBeat == 0) {
@@ -504,6 +566,8 @@ function create() {
             cycle += 1;
         },
         (60000 / song.tempo) /* duration of beat in ms */ / updatesPerBeat);
+	}
+
 
         //true);
 }
