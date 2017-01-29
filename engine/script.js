@@ -102,7 +102,7 @@ var QueryString = function () {
   return query_string;
 }();
 
-var channelName = "/room/" + QueryString["room"];
+var channelName = "/room/" + (QueryString["room"] || "Default");
 
 subscribe(channelName, function(event) {
 	message = JSON.parse(event.getData());
@@ -312,9 +312,6 @@ function create() {
     var maxFret = -1;
     var piBuffer = [];
     for (var pix in playItems) {
-        if (playItems[pix].instrument != instrument) {
-            continue;
-        }
         var change = false;
         do
         {
@@ -323,6 +320,9 @@ function create() {
             var index = 0;
             for (var pixi in playItems[pix] || []) {
                 var playItem = playItems[pix][pixi];
+                if (playItem.instrument != instrument) {
+                    continue;
+                }
                 if (playItem.isBacking) {
                     continue;
                 }

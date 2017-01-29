@@ -1,5 +1,5 @@
 var session = Nirvana.createSession({
-	realms : ["http://localhost:11000"],
+	realms : ["http://192.168.111.22:11000/"],
 	applicationName : "MultiplayerBand"
 });
 
