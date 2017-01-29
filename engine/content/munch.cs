@@ -72,7 +72,7 @@ class Program
                     if (left == "name")
                     {
                         int fret, s;
-                        PitchToStringAndFret(right, out s, out fret);
+                        // PitchToStringAndFret(right, out s, out fret);
                         Console.WriteLine(line);
                         // Console.WriteLine($"    note: [{s}, {fret}], // " + line.Trim());
                         continue;
