@@ -39,9 +39,10 @@ class InviteFriendsPageContainer extends Component {
     }
 
     onStartButtonClick = () => {
-        const { room } = this.props
+        const { userId, room, roomReady } = this.props
 
-        publishMessage(`room/${room}`, { type: 'startGame' })
+        roomReady({ room, userId })
+        publishMessage(`room/${room}`, { type: 'startGame', room })
     }
 
     render() {
