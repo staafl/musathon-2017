@@ -411,9 +411,19 @@ function create() {
                     (1 + startBeats + item.time / beatDivisions) * beatWidthAndPadding,
                     guitarStringToY[item.note[0]] - 9,
                     'qNote');
+
             noteSprite.scale.setTo((beatWidth / beatIconWidth) * item.beats, 1);
             item.sprite = noteSprite;
             item.expectedKey = keyboard2[item.note[0] - 1][item.note[1] - item.position];
+
+            game.add.text(
+                3 + (1 + startBeats + item.time / beatDivisions) * beatWidthAndPadding,
+                guitarStringToY[item.note[0]] - 30,
+                item.expectedKey, { fill: 'white', fontSize: '18px' })
+            game.add.text(
+                3 + (1 + startBeats + item.time / beatDivisions) * beatWidthAndPadding,
+                guitarStringToY[item.note[0]] - 9,
+                item.name, { fill: 'white', fontSize: '18px' })
         }
     }
 
@@ -464,7 +474,17 @@ function create() {
                         if (!playItem.isBacking) {
                             currentPosition = playItem.position || currentPosition;
                             // console.log("Reached " + JSON.stringify(playItem));
-                            noteBuffer.push([playItem.note[0], playItem.note[1], currentTime]);
+
+                            /*game.add.sprite(
+                                playItem.sprite.x,
+                                guitarStringToY[item.note[0]] - 9,
+                                'qNote');*/
+                            var notesArray = [playItem.note[0], playItem.note[1], currentTime]
+
+                            if (playItem.sprite !== undefined) {
+                                notesArray.push(playItem.sprite)
+                            }
+                            noteBuffer.push(notesArray);
                         }
                       }
                   }
@@ -483,6 +503,7 @@ function matchBuffers() {
     for (var ii = keyBuffer.length - 1; ii >= 0; ii--) {
         if (currentTime - keyBuffer[ii][2] > bufferDelay) {
             // console.log("Extra key: " + JSON.stringify(keyBuffer[ii]));
+            // on empty line
             keyBuffer.splice(ii, 1);
         }
     }
@@ -490,6 +511,9 @@ function matchBuffers() {
     for (var ii = noteBuffer.length - 1; ii >= 0; ii--) {
         if (currentTime - noteBuffer[ii][2] > bufferDelay) {
             // console.log("Missed note: " + JSON.stringify(noteBuffer[ii]));
+            if (noteBuffer[ii][3]) {
+                noteBuffer[ii][3].tint = '0xff0000'
+            }
             noteBuffer.splice(ii, 1);
         }
     }
@@ -498,7 +522,9 @@ function matchBuffers() {
     for (var jj = keyBuffer.length - 1; jj >= 0; jj--) {
         if (keyBuffer[jj][0] == noteBuffer[ii][0] &&
             keyBuffer[jj][1] == noteBuffer[ii][1]) {
-            console.log("Matched " + JSON.stringify(keyBuffer[jj]));
+            if (noteBuffer[ii][3]) {
+                noteBuffer[ii][3].tint = '0x00ff00'
+            }
             // matchedTimes.push(noteBuffer[ii][2]);
             keyBuffer.splice(jj, 1);
             noteBuffer.splice(ii, 1);

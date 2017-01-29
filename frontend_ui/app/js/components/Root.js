@@ -32,7 +32,8 @@ export const subscribeRoomPartial = roomId => {
             defaultStore.dispatch(setPlayers({ players: data.room.members }))
         }
         if (data.type === 'startGame') {
-            window.location.replace('http://192.168.111.67:8080/')
+            console.info(data)
+            window.location.replace(`http://192.168.111.67:8080?room=${data.room}`)
         }
     })
 }
