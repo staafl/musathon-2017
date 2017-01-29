@@ -1,1 +1,10 @@
 export const CREATE_ROOM = 'CREATE_ROOM'
+export const JOIN_ROOM = 'JOIN_ROOM'
+
+export const SET_USER_ID = 'SET_USER_ID'
+export const SET_INSTRUMENT_ID = 'SET_INSTRUMENT_ID'
+export const CHOOSE_INSTRUMENT = 'CHOOSE_INSTRUMENT'
+export const SET_ROOM_ID = 'SET_ROOM_ID'
+export const SET_SONG_ID = 'SET_SONG_ID'
+export const SET_PLAYERS = 'SET_PLAYERS'
+export const SET_IS_HOST = 'SET_IS_HOST'

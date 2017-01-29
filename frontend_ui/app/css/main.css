@@ -91,7 +91,7 @@ h1 {
     font-size: 26px;
 }
 
-.home .btn {
+.home .btn, .invite-players .btn {
     background-color: var(--main-pink-color);
     border: 1px solid white;
     margin-top: 20px;
@@ -99,11 +99,16 @@ h1 {
     display: inline-block;
 }
 
+.invite-players .btn {
+    margin-top: 50px;
+    width: 350px;
+}
+
 .home .create-button {
     margin-top: 80px;
 }
 
-.home .btn:hover {
+.home .btn:hover, .invite-players .btn:hover {
     background-color: var(--main-white-text-color);
     color: var(--main-pink-color);
 }
@@ -139,6 +144,9 @@ h1 {
 ul.workflow {
     width: 100%;
     margin: 20px 0 30px;
+    position: absolute;
+    bottom: 40px;
+    left: 0px;
 }
 ul.workflow > li {
     color: whitesmoke;
@@ -159,5 +167,40 @@ ul.workflow > li .fa {
     top: -35px;
 }
 
-.song-search {
+.invite-players .player {
+    text-align: left;
 }
+
+.invite-players .player {
+    margin: 20px;
+    padding-left: 20%;
+}
+
+.invite-players .player-self .player-name {
+    position: relative;
+    bottom: 7px;
+}
+
+.invite-players .select-instrument {
+    width: 200px;
+    display: inline-block;
+    vertical-align: bottom;
+    margin-left: 20px;
+}
+
+.invite-players .url {
+    margin-top: 150px;
+}
+
+.well {
+    background-color: white;
+    color: var(--main-pink-color)
+}
+
+.invite-players .join {
+    font-size: 30px;
+    margin-right: 20px;
+    position: relative;
+    top: 5px;
+}
+

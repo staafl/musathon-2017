@@ -26,6 +26,10 @@ app.use('http://192.168.111.21:8080/rooms/*', function () {
 
 })
 
+app.use('/play', function (req, res) {
+    res.sendFile(path.resolve('play/', 'index.html'))
+})
+
 app.use('/*', function (req, res) {
     res.sendFile(path.resolve('app/', 'index.html'))
 })
