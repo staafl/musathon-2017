@@ -31,7 +31,9 @@ export const subscribeRoomPartial = roomId => {
         if (data.type === 'joinedRoom' || data.type === 'instrumentChosen') {
             defaultStore.dispatch(setPlayers({ players: data.room.members }))
         }
-        console.log(JSON.parse(event.getData()))
+        if (data.type === 'startGame') {
+            window.location.replace('http://192.168.111.67:8080/')
+        }
     })
 }
 
