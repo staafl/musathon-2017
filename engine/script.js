@@ -25,7 +25,7 @@ var currentBar;
 var notes;
 var playItems = {};
 var sounds = {};
-var defaultOctaveShift = -1;
+var defaultOctaveShift = 0;
 
 var guitarStringToY =
 {
@@ -39,9 +39,10 @@ var guitarStringToY =
 
 function pitchToStringAndFret(p)
 {
+    for (var pos = 0; pos <= 16; pos += 4)
     for (var ii = 1; ii <= 6; ++ii) {
-        for (var f = 0; f <= 5; ++f) {
-            if (stringAndFretToPitch(ii, f) == p) {
+        for (var f = 0; f <= 4; ++f) {
+            if (stringAndFretToPitch(ii, f + pos) == p) {
                 return [ii, f];
             }
         }
@@ -157,7 +158,15 @@ function create() {
     if (instrument = "guitar") {
         for (var bix in song.parts.guitar) {
             var item = song.parts.guitar[bix];
-            playItems[item.time] = item;
+            playItems[item.time] = playItems[item.time] || [];
+            playItems[item.time].push(item);
+            var name = item.name;
+            // console.log(name);
+            item.note = pitchToStringAndFret(name);
+        }
+
+        for (var bix in song.parts.guitar) {
+            var item = song.parts.guitar[bix];
             if (!isNaN(item.note[0]) &&
                 !item.isBacking) {
                 var noteSprite =
@@ -168,6 +177,80 @@ function create() {
                 noteSprite.scale.setTo((beatWidth / beatIconWidth) * item.beats, 1);
             }
         }
+
+        var position = 0;
+        var minFret = 100;
+        var maxFret = -1;
+        var piBuffer = [];
+        for (var pix in playItems) {
+            var change = false;
+            do
+            {
+                var minNow = 100;
+                var maxNow = -1;
+                var index = 0;
+                for (var pixi in playItems[pix] || []) {
+                    var playItem = playItems[pix][pixi];
+                    if (playItem.isBacking) {
+                        continue;
+                    }
+
+                    if (Math.max(playItem.note[1], maxFret) - Math.min(playItem.note[1], minFret) > 3) {
+                        if (Math.max(playItem.note[1], maxNow) - Math.min(playItem.note[1], minNow) > 3) {
+                            console.log("too big of a stretch here: " + pix);
+                            playItem.isBacking = true;
+                            continue;
+                        }
+                        else {
+                            change = true;
+                            break;
+                        }
+                    }
+                    if (index >= 2) {
+                        console.log("too many notes: " + pix);
+                        playItem.isBacking = true;
+                        continue;
+                    }
+                    
+                    index += 1;
+
+                    if (playItem.note[1] > maxFret) {
+                        maxFret = playItem.note[1];
+                    }
+                    if (playItem.note[1] < minFret) {
+                        minFret = playItem.note[1];
+                    }
+                    if (playItem.note[1] > maxNow) {
+                        maxNow = playItem.note[1];
+                    }
+                    if (playItem.note[1] < minNow) {
+                        minNow = playItem.note[1];
+                    }
+
+                    position = minFret;
+                }
+                if (change) {
+                    minFret = 100;
+                    maxFret = -1;
+                    for (var ii = 0; ii < piBuffer.length; ++ii) {
+                        piBuffer[ii].position = position;
+                    }
+                    piBuffer = [];
+                    change = false;
+                    continue;
+                }
+                else {
+                    piBuffer = piBuffer.concat(playItems[pix]);
+                    change = false;
+                    break;
+                }
+            }
+            while (false);
+        }
+    }
+    position = minFret;
+    for (var ii = 0; ii < piBuffer.length; ++ii) {
+        piBuffer[ii].position = position;
     }
 
     currentBar =
@@ -189,19 +272,23 @@ function create() {
                 setTimeout(onBeat, 0);
             }
             if (mod % (updatesPerBeat / beatDivisions) == 0) {
-                
+
                 var time = cycle / (updatesPerBeat / beatDivisions) - beatDivisions*startBeats;
                 // console.log("current time: " + time);
-                var playItem = playItems[time];
-                if (playItem) {
-                    setTimeout(function() {
-                        var note = playItem.note;
-                        var name = stringAndFretToPitch(note[0], note[1], -1);
-                        console.log(name);
-                        sounds["guitar"][name].play();
-                    }, 0);
-                }
-                
+                (function() {
+                    var playItemsNow = playItems[time];
+                    if (playItemsNow) {
+                        setTimeout(function() {
+                            for (var ii = 0; ii < playItemsNow.length; ++ii) {
+                                var playItem = playItemsNow[ii];
+                                var note = playItem.note;
+                                var name = stringAndFretToPitch(note[0], note[1], -1);
+                                // console.log(name);
+                                sounds["guitar"][name].play();
+                            }
+                        }, 0);
+                    }
+                })();
             }
             game.camera.x += beatWidthAndPadding / updatesPerBeat;
             if (currentBar)
