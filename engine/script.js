@@ -142,8 +142,14 @@ function pitchToStringAndFret(p, Shift)
             }
         }
     }
+    for (var f = -1; f >= -50; --f) {
+        if (stringAndFretToPitch(6, f, Shift) == p) {
+            // console.log("Resolving " + p + " as " + JSON.stringify([ii, f]));
+            return [6, f];
+        }
+    }
     console.log(p);
-    return [0, 0];//throw new Exception();
+    throw new Exception();
     return null;
 }
 
@@ -153,7 +159,7 @@ function stringAndFretToPitch(s, f, a)
     var strings = ['E','B','G','D','A','E'];
     var stringOctave = [4, 3, 3, 3, 2, 2];
     var indexOf = notes.indexOf(strings[s - 1]);
-    var toReturn = notes[(indexOf + f) % notes.length];
+    var toReturn = notes[(indexOf + f + notes.length * 1000) % notes.length];
     toReturn += (stringOctave[s-1] + Math.floor((f + indexOf) / 12) + (a == undefined ? octaveShiftInput : a));
     return toReturn;
 }
@@ -176,12 +182,18 @@ function preload() {
     for (var s = 1; s <= 6; ++s) {
         for (var f = 0; f <= 10; ++f) {
             console.log(stringAndFretToPitch(s, f, octaveShiftInput));
+            notesToAdd[stringAndFretToPitch(s, f, -3)] = true;;
+            notesToAdd[stringAndFretToPitch(s, f, -2)] = true;;
+            notesToAdd[stringAndFretToPitch(s, f, -1)] = true;;
             notesToAdd[stringAndFretToPitch(s, f, 0)] = true;;
             notesToAdd[stringAndFretToPitch(s, f, octaveShiftInput)] = true;;
             notesToAdd[stringAndFretToPitch(s, f, octaveShiftInput - 1)] = true;;
         }
     }
     for (var f = 6; f <= 20; ++f) {
+        notesToAdd[stringAndFretToPitch(s, f, -3)] = true;;
+        notesToAdd[stringAndFretToPitch(s, f, -2)] = true;;
+        notesToAdd[stringAndFretToPitch(s, f, -1)] = true;;
         notesToAdd[stringAndFretToPitch(1, f, 0)] = true;;
         notesToAdd[stringAndFretToPitch(1, f, octaveShiftInput)] = true;;
         notesToAdd[stringAndFretToPitch(1, f, octaveShiftInput - 1)] = true;;
@@ -308,15 +320,15 @@ function create() {
 
     // assign .position
     var position = 0;
-    var minFret = 100;
-    var maxFret = -1;
+    var minFret = 10000;
+    var maxFret = -999;
     var piBuffer = [];
     for (var pix in playItems) {
         var change = false;
         do
         {
-            var minNow = 100;
-            var maxNow = -1;
+            var minNow = 10000;
+            var maxNow = -99999;
             var index = 0;
             for (var pixi in playItems[pix] || []) {
                 var playItem = playItems[pix][pixi];
@@ -327,8 +339,8 @@ function create() {
                     continue;
                 }
 
-                if (Math.max(playItem.note[1], maxFret) - Math.min(playItem.note[1], minFret) > 3) {
-                    if (Math.max(playItem.note[1], maxNow) - Math.min(playItem.note[1], minNow) > 3) {
+                if (Math.abs(Math.max(playItem.note[1], maxFret) - Math.min(playItem.note[1], minFret)) > 3) {
+                    if (Math.abs(Math.max(playItem.note[1], maxNow) - Math.min(playItem.note[1], minNow)) > 3) {
                         console.log("too big of a stretch here: " + pix);
                         playItem.isBacking = true;
                         continue;
@@ -362,8 +374,8 @@ function create() {
                 position = minFret;
             }
             if (change) {
-                minFret = 100;
-                maxFret = -1;
+                minFret = 10000;
+                maxFret = -99999;
                 for (var ii = 0; ii < piBuffer.length; ++ii) {
                     piBuffer[ii].position = position;
                 }
