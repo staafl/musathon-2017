@@ -1,0 +1,14 @@
+<html>
+	<head>
+		<script src="lib/nirvana.js"></script>
+		<script src="lib/broker_facade.js"></script>
+		<script>		
+			subscribe("/test/channel", function(event){
+				console.log(event.getData());
+			});
+		</script>
+	</head>
+	<body>
+		<button id="publishButton" onclick='publishMessage("/test/channel", {test: "property"});'>Publish Message</button>
+	</body>
+</html>
