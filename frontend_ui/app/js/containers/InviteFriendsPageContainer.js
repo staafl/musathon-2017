@@ -16,6 +16,7 @@ import {
 import { mapValuesToMultiSelectOptions } from '../utils/utils'
 import { ALBUMS } from '../constants/global'
 import { joinRoom, setInstrumentId, chooseInstrument } from '../actions/rooms'
+import { publishMessage } from '../../lib/broker_facade'
 
 class InviteFriendsPageContainer extends Component {
     componentDidMount() {
@@ -38,9 +39,9 @@ class InviteFriendsPageContainer extends Component {
     }
 
     onStartButtonClick = () => {
-        const { push } = this.props
+        const { room } = this.props
 
-        push('/play')
+        publishMessage(`room/${room}`, { type: 'startGame' })
     }
 
     render() {
