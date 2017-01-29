@@ -532,7 +532,7 @@ var cycle = 0;
 
 function onBeat()
 {
-    if (currentBeat % 1 == 0) {
+    if (currentBeat % 1 == 0 && currentBeat <= 0) {
         click.play();
     }
 }
