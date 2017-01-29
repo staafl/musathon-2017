@@ -16,8 +16,7 @@ export const ALBUMS = [
         alt: '',
         instruments: [
             'guitar',
-            'guitar',
-            'bass-guitar'
+            'bass-guitar1'
         ]
     },
     {
@@ -28,8 +27,7 @@ export const ALBUMS = [
         alt: '',
         instruments: [
             'guitar',
-            'guitar',
-            'bass-guitar'
+            'bass-guitar1'
         ]
     },
     {
@@ -40,8 +38,7 @@ export const ALBUMS = [
         alt: '',
         instruments: [
             'guitar',
-            'guitar',
-            'bass-guitar'
+            'bass-guitar1'
         ]
     },
     {
@@ -52,8 +49,7 @@ export const ALBUMS = [
         alt: '',
         instruments: [
             'guitar',
-            'guitar',
-            'bass-guitar'
+            'bass-guitar1'
         ]
     },
     {
@@ -64,8 +60,7 @@ export const ALBUMS = [
         alt: '',
         instruments: [
             'guitar',
-            'guitar',
-            'bass-guitar'
+            'bass-guitar1'
         ]
     },
     {
@@ -76,8 +71,7 @@ export const ALBUMS = [
         alt: '',
         instruments: [
             'guitar',
-            'guitar',
-            'bass-guitar'
+            'bass-guitar1'
         ]
     }
 ]

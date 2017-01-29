@@ -139,6 +139,9 @@ h1 {
 ul.workflow {
     width: 100%;
     margin: 20px 0 30px;
+    position: absolute;
+    bottom: 40px;
+    left: 0px;
 }
 ul.workflow > li {
     color: whitesmoke;
@@ -159,5 +162,39 @@ ul.workflow > li .fa {
     top: -35px;
 }
 
-.song-search {
+.invite-players .player {
+    text-align: left;
+}
+
+.invite-players .player {
+    margin: 20px;
+    padding-left: 20%;
+}
+
+.invite-players .player-self .player-name {
+    position: relative;
+    bottom: 7px;
+}
+
+.invite-players .select-instrument {
+    width: 200px;
+    display: inline-block;
+    vertical-align: bottom;
+    margin-left: 20px;
+}
+
+.invite-players .url {
+    margin: 150px;
+}
+
+.well {
+    background-color: white;
+    color: var(--main-pink-color)
+}
+
+.invite-players .join {
+    font-size: 30px;
+    margin-right: 20px;
+    position: relative;
+    top: 5px;
 }

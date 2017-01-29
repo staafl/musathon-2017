@@ -29,6 +29,7 @@ export const routingPathnameSelector = state =>
 /* routing selectors end */
 
 export const userIdSelector = state => fromRooms.userIdSelector(state.rooms)
+export const isHostSelector = state => fromRooms.isHostSelector(state.rooms)
 export const instrumentSelector = state => fromRooms.instrumentSelector(state.rooms)
 export const roomSelector = state => fromRooms.roomSelector(state.rooms)
 export const playersSelector = state => fromRooms.playersSelector(state.rooms)
