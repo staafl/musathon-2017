@@ -12,10 +12,11 @@ var game = new Phaser.Game(
 
 var instrument = "guitar";
 var beatIconWidth = 100;
-var beatWidth = 100;
+var beatWidth = 200;
+// DEBUG var startBeats = 0; // 1 * song.beatsPerMeasure;
 var startBeats = 1 * song.beatsPerMeasure;
 var totalBeatsIncludingStart = (startBeats + song.duration) * song.tempo / 60;
-var beatWidthAndPadding = 128;
+var beatWidthAndPadding = 256;
 var totalWidth = (1 + totalBeatsIncludingStart) * beatWidthAndPadding + 2*screen.width;
 var updatesPerBeat = 128;
 var beatDivisions = 16;
@@ -26,7 +27,8 @@ var currentTime;
 var notes;
 var playItems = {};
 var sounds = {};
-var defaultOctaveShift = -1;
+var octaveShiftSamples = -1;
+var octaveShiftInput = 0;
 var currentPosition = 0;
 var allPitches = [];
 var bufferDelay = 10;
@@ -39,7 +41,15 @@ var keyboard =
         [Phaser.Keyboard.FIVE,Phaser.Keyboard.T,Phaser.Keyboard.G,Phaser.Keyboard.B],
         [Phaser.Keyboard.SIX,Phaser.Keyboard.Y,Phaser.Keyboard.H,Phaser.Keyboard.N],
     ];
-
+var keyboard2 =
+    [
+        ["1","Q","A","Z"],
+        ["2","W","S","X"],
+        ["3","E","D","C"],
+        ["4","R","F","V"],
+        ["5","T","G","B"],
+        ["6","Y","H","N"],
+    ];
 var keyBuffer = [];
 var noteBuffer = [];
 
@@ -63,12 +73,12 @@ function pitchToStringAndFret(p, Shift)
 //            }
 //        }
 //    }
-    for (var pos = 0; pos <= 24; pos += 4)
+    for (var pos = 0; pos <= 24; pos += 3)
         for (var ii = 1; ii <= 6; ++ii) {
-        for (var f = 0; f <= 4; ++f) {
-            if (stringAndFretToPitch(ii, f + pos, Shift == undefined ? defaultOctaveShift : Shift) == p) {
+        for (var f = 0; f <= 3; ++f) {
+            if (stringAndFretToPitch(ii, f + pos, Shift) == p) {
                 // console.log("Resolving " + p + " as " + JSON.stringify([ii, f]));
-                return [ii, f];
+                return [ii, f + pos];
             }
         }
     }
@@ -84,7 +94,7 @@ function stringAndFretToPitch(s, f, a)
     var stringOctave = [4, 3, 3, 3, 2, 2];
     var indexOf = notes.indexOf(strings[s - 1]);
     var toReturn = notes[(indexOf + f) % notes.length];
-    toReturn += (stringOctave[s-1] + Math.floor((f + indexOf) / 12) + (a == undefined ? defaultOctaveShift : 0));
+    toReturn += (stringOctave[s-1] + Math.floor((f + indexOf) / 12) + (a == undefined ? octaveShiftInput : a));
     return toReturn;
 }
 
@@ -103,15 +113,19 @@ function preload() {
 
     // todo: slip loading samples we won't need
     if (instrument = "guitar") {
-        var notesToAdd = {};
+        notesToAdd = {};
         for (var s = 1; s <= 6; ++s) {
             for (var f = 0; f <= 10; ++f) {
-                console.log(stringAndFretToPitch(s, f, defaultOctaveShift));
-                notesToAdd[stringAndFretToPitch(s, f, defaultOctaveShift)] = true;;
+                console.log(stringAndFretToPitch(s, f, octaveShiftInput));
+                notesToAdd[stringAndFretToPitch(s, f, 0)] = true;;
+                notesToAdd[stringAndFretToPitch(s, f, octaveShiftInput)] = true;;
+                notesToAdd[stringAndFretToPitch(s, f, octaveShiftInput - 1)] = true;;
             }
         }
         for (var f = 6; f <= 20; ++f) {
-            notesToAdd[stringAndFretToPitch(1, f, defaultOctaveShift)] = true;;
+            notesToAdd[stringAndFretToPitch(1, f, 0)] = true;;
+            notesToAdd[stringAndFretToPitch(1, f, octaveShiftInput)] = true;;
+            notesToAdd[stringAndFretToPitch(1, f, octaveShiftInput - 1)] = true;;
         }
         notesToAdd = Object.keys(notesToAdd);
         for (var n in Object.keys(notesToAdd)) {
@@ -159,7 +173,7 @@ function handleKey(s, f) {
     // console.log(name);
     // console.log("Key: " + JSON.stringify([s, currentPosition + f, currentTime]));
     keyBuffer.push([s, currentPosition + f, currentTime]);
-    var name = stringAndFretToPitch(s, currentPosition + f);
+    var name = stringAndFretToPitch(s, currentPosition + f, octaveShiftSamples);
     sounds["guitar"][name].play();
     matchBuffers();
 }
@@ -218,7 +232,7 @@ function create() {
             playItems[item.time].push(item);
             var name = item.name;
             // console.log(name);
-            item.note = pitchToStringAndFret(name, -1);
+            item.note = pitchToStringAndFret(name, 0);
         }
 
         for (var bix in song.parts.guitar) {
@@ -304,12 +318,17 @@ function create() {
                     break;
                 }
             }
-            while (false);
+            while (true);
         }
     }
     position = minFret;
     for (var ii = 0; ii < piBuffer.length; ++ii) {
         piBuffer[ii].position = position;
+    }
+
+    for (var bix in song.parts.guitar) {
+        var item = song.parts.guitar[bix];
+        item.expectedKey = keyboard2[item.note[0] - 1][item.note[1] - item.position];
     }
 
     currentBar =
@@ -319,7 +338,9 @@ function create() {
             'currentBar');
 
     currentBar.scale.setTo(2, 2);
-    currentBeat = -startBeats-1;
+    currentBeat = -startBeats - 1; 
+    // DEBUG
+    // currentBeat = 0; // TODO: -startBeats-1;
     //game.time.events.loop(
         //(60000 / song.tempo) /* duration of beat in ms */ / (2 * updatesPerBeat));
     setInterval(
@@ -334,23 +355,26 @@ function create() {
 
                   currentTime = cycle / (updatesPerBeat / beatDivisions) - beatDivisions*startBeats;
 //console.log("current time: " + currentTime);
-    
+
                   var playItemsNow = playItems[currentTime];
                   if (playItemsNow) {
                       // console.log(playItemsNow);
                       for (var ii = 0; ii < playItemsNow.length; ++ii) {
                         var playItem = playItemsNow[ii];
-                        if (playItem.isBacking) {
+                        // console.log("Expected key: " + playItem.expectedKey);
+                        if (playItem.isBacking)
+                        {
                             (function() {
                                 var ss = playItem.note[0];
                                 var ff = playItem.note[1];
                                 setTimeout(function() {
-                                    var name = stringAndFretToPitch(ss, ff);
-                                    sounds["guitar"][name].play();                                
+                                    var name = stringAndFretToPitch(ss, ff, octaveShiftSamples);
+                                    //console.log("Playing backing " + name);
+                                    sounds["guitar"][name].play();
                                 }, 0);
                             })();
                         }
-                        else {
+                        if (!playItem.isBacking) {
                             currentPosition = playItem.position;
                             // console.log("Reached " + JSON.stringify(playItem));
                             noteBuffer.push([playItem.note[0], playItem.note[1], currentTime]);
@@ -371,14 +395,14 @@ function create() {
 function matchBuffers() {
     for (var ii = keyBuffer.length - 1; ii >= 0; ii--) {
         if (currentTime - keyBuffer[ii][2] > bufferDelay) {
-            console.log("Extra key: " + JSON.stringify(keyBuffer[ii]));
+            // console.log("Extra key: " + JSON.stringify(keyBuffer[ii]));
             keyBuffer.splice(ii, 1);
         }
     }
 
     for (var ii = noteBuffer.length - 1; ii >= 0; ii--) {
         if (currentTime - noteBuffer[ii][2] > bufferDelay) {
-            console.log("Missed note: " + JSON.stringify(noteBuffer[ii]));
+            // console.log("Missed note: " + JSON.stringify(noteBuffer[ii]));
             noteBuffer.splice(ii, 1);
         }
     }
@@ -386,7 +410,7 @@ function matchBuffers() {
     for (var ii = noteBuffer.length - 1; ii >= 0; ii--) {
     for (var jj = keyBuffer.length - 1; jj >= 0; jj--) {
         if (keyBuffer[jj][0] == noteBuffer[ii][0] &&
-            keyBuffer[jj][0] == noteBuffer[ii][0]) {
+            keyBuffer[jj][1] == noteBuffer[ii][1]) {
             console.log("Matched " + JSON.stringify(keyBuffer[jj]));
             // matchedTimes.push(noteBuffer[ii][2]);
             keyBuffer.splice(jj, 1);
