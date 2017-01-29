@@ -59,15 +59,18 @@ public class MultiplayerBandController {
     {
         UserJoinedToRoom result = service.joinRoom(roomId);
 
-        RoomUpdated roomUpdated = new RoomUpdated();
-        roomUpdated.type = "joinedRoom";
-        roomUpdated.room = result.room;
-        String notification = mapper.writeValueAsString(roomUpdated);
+        if (!result.failed)
+        {
+            RoomUpdated roomUpdated = new RoomUpdated();
+            roomUpdated.type = "joinedRoom";
+            roomUpdated.room = result.room;
+            String notification = mapper.writeValueAsString(roomUpdated);
 
-        nChannel channel = nsession.findChannel(new nChannelAttributes("/room/" + result.room.id));
+            nChannel channel = nsession.findChannel(new nChannelAttributes("/room/" + result.room.id));
 
-        nConsumeEvent event = nConsumeEventFactory.create("", notification.getBytes(), -1, false);
-        channel.publish(event);
+            nConsumeEvent event = nConsumeEventFactory.create("", notification.getBytes(), -1, false);
+            channel.publish(event);
+        }
 
         return result;
     }
@@ -82,7 +85,7 @@ public class MultiplayerBandController {
         Room result = service.addInstrumentToRoom(roomId, userId, instrument);
 
         RoomUpdated roomUpdated = new RoomUpdated();
-        roomUpdated.type = "joinedRoom";
+        roomUpdated.type = "instrumentChosen";
         roomUpdated.room = result;
         String notification = mapper.writeValueAsString(roomUpdated);
 

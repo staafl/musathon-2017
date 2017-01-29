@@ -14,6 +14,8 @@ public class MultiplayerBandService {
     @Autowired
     private ApplicationState state;
 
+    private final int MAGIC_NUMBER = 2;
+
     public Room createRoom(String songId)
     {
         Room room = new Room();
@@ -33,6 +35,14 @@ public class MultiplayerBandService {
     public UserJoinedToRoom joinRoom(String roomId)
     {
         Room room  = state.rooms.get(roomId);
+        UserJoinedToRoom result = new UserJoinedToRoom();
+
+        if (room.members.size() >= MAGIC_NUMBER)
+        {
+            result.failed = true;
+            return result;
+        }
+
         String id = null;
 
         BandMember newMember = new BandMember();
@@ -60,7 +70,6 @@ public class MultiplayerBandService {
         newMember.id = id;
         room.members.add(newMember);
 
-        UserJoinedToRoom result = new UserJoinedToRoom();
         result.userId = id;
         result.room = room;
 
