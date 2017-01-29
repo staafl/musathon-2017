@@ -1,3 +1,29 @@
+
+var QueryString = function () {
+  // This function is anonymous, is executed immediately and
+  // the return value is assigned to QueryString!
+  var query_string = {};
+  var query = window.location.search.substring(1);
+  var vars = query.split("&");
+  for (var i=0;i<vars.length;i++) {
+    var pair = vars[i].split("=");
+        // If first entry with this name
+    if (typeof query_string[pair[0]] === "undefined") {
+      query_string[pair[0]] = decodeURIComponent(pair[1]);
+        // If second entry with this name
+    } else if (typeof query_string[pair[0]] === "string") {
+      var arr = [ query_string[pair[0]],decodeURIComponent(pair[1]) ];
+      query_string[pair[0]] = arr;
+        // If third or later entry with this name
+    } else {
+      query_string[pair[0]].push(decodeURIComponent(pair[1]));
+    }
+  }
+  return query_string;
+}();
+
+var instruments = ["guitar", "bass", "drums"];
+
 var game = new Phaser.Game(
     screen.width,
     screen.height,
@@ -10,11 +36,11 @@ var game = new Phaser.Game(
         render: render
     });
 
-var instrument = "guitar";
+var instrument = QueryString["instrument"] || "guitar";
 var beatIconWidth = 100;
 var beatWidth = 200;
 // DEBUG var startBeats = 0; // 1 * song.beatsPerMeasure;
-var startBeats = 1 * song.beatsPerMeasure;
+var startBeats = 0; // 1 * song.beatsPerMeasure;
 var totalBeatsIncludingStart = (startBeats + song.duration) * song.tempo / 60;
 var beatWidthAndPadding = 256;
 var totalWidth = (1 + totalBeatsIncludingStart) * beatWidthAndPadding + 2*screen.width;
@@ -30,7 +56,7 @@ var sounds = {};
 var octaveShiftSamples = -1;
 var octaveShiftInput = 0;
 var currentPosition = 0;
-var allPitches = [];
+var allPitches = {};
 var bufferDelay = 10;
 var keyboard =
     [
@@ -83,7 +109,7 @@ function pitchToStringAndFret(p, Shift)
         }
     }
     console.log(p);
-    throw new Exception();
+    return [0, 0];//throw new Exception();
     return null;
 }
 
@@ -111,28 +137,30 @@ function preload() {
 
     game.load.audio('woodclick', 'resources/woodclick.ogg');
 
+
+    notesToAdd = {};
+    for (var s = 1; s <= 6; ++s) {
+        for (var f = 0; f <= 10; ++f) {
+            console.log(stringAndFretToPitch(s, f, octaveShiftInput));
+            notesToAdd[stringAndFretToPitch(s, f, 0)] = true;;
+            notesToAdd[stringAndFretToPitch(s, f, octaveShiftInput)] = true;;
+            notesToAdd[stringAndFretToPitch(s, f, octaveShiftInput - 1)] = true;;
+        }
+    }
+    for (var f = 6; f <= 20; ++f) {
+        notesToAdd[stringAndFretToPitch(1, f, 0)] = true;;
+        notesToAdd[stringAndFretToPitch(1, f, octaveShiftInput)] = true;;
+        notesToAdd[stringAndFretToPitch(1, f, octaveShiftInput - 1)] = true;;
+    }
+    notesToAdd = Object.keys(notesToAdd);
+
     // todo: slip loading samples we won't need
-    if (instrument = "guitar") {
-        notesToAdd = {};
-        for (var s = 1; s <= 6; ++s) {
-            for (var f = 0; f <= 10; ++f) {
-                console.log(stringAndFretToPitch(s, f, octaveShiftInput));
-                notesToAdd[stringAndFretToPitch(s, f, 0)] = true;;
-                notesToAdd[stringAndFretToPitch(s, f, octaveShiftInput)] = true;;
-                notesToAdd[stringAndFretToPitch(s, f, octaveShiftInput - 1)] = true;;
-            }
-        }
-        for (var f = 6; f <= 20; ++f) {
-            notesToAdd[stringAndFretToPitch(1, f, 0)] = true;;
-            notesToAdd[stringAndFretToPitch(1, f, octaveShiftInput)] = true;;
-            notesToAdd[stringAndFretToPitch(1, f, octaveShiftInput - 1)] = true;;
-        }
-        notesToAdd = Object.keys(notesToAdd);
+    for (var ix in instruments) {
+        var thisinstrument = instruments[ix];
+        allPitches[thisinstrument] = [];
         for (var n in Object.keys(notesToAdd)) {
             var name = notesToAdd[n];
-            console.log("Loading " + name);
-            allPitches.push(name);
-            game.load.audio(name, 'samples/xt/' + name.replace("#", "%23") + '.wav');
+            game.load.audio(thisinstrument + "-" + name, 'samples/' + thisinstrument + '/' + name.replace("#", "%23") + '.wav');
         }
     }
 }
@@ -174,7 +202,7 @@ function handleKey(s, f) {
     // console.log("Key: " + JSON.stringify([s, currentPosition + f, currentTime]));
     keyBuffer.push([s, currentPosition + f, currentTime]);
     var name = stringAndFretToPitch(s, currentPosition + f, octaveShiftSamples);
-    sounds["guitar"][name].play();
+    sounds[instrument][name].play();
     matchBuffers();
 }
 
@@ -220,115 +248,126 @@ function create() {
         time += 1;
     }
 
-    sounds["guitar"] = {};
-    for (var ix in allPitches) {
-        sounds["guitar"][allPitches[ix]] = game.add.audio(allPitches[ix]);
+    for (var ix in instruments) {
+        var thisinstrument = instruments[ix];
+        sounds[thisinstrument] = {};
+        for (var ix1 in notesToAdd) {
+            sounds[thisinstrument][notesToAdd[ix1]] = game.add.audio(thisinstrument + "-" + notesToAdd[ix1]);
+        }
     }
 
-    if (instrument = "guitar") {
-        for (var bix in song.parts.guitar) {
-            var item = song.parts.guitar[bix];
+    // assign instrument
+    for (var thisInstrumentIx in instruments)
+    {
+        var thisInstrument = instruments[thisInstrumentIx];
+        for (var bix in song.parts[thisInstrument]) {
+            var item = song.parts[thisInstrument][bix];
+            item.instrument = thisInstrument;
             playItems[item.time] = playItems[item.time] || [];
             playItems[item.time].push(item);
             var name = item.name;
             // console.log(name);
             item.note = pitchToStringAndFret(name, 0);
         }
+    }
 
-        for (var bix in song.parts.guitar) {
-            var item = song.parts.guitar[bix];
-            if (!item.note) {
-                console.log(item.name);
-            }
-            if (!isNaN(item.note[0]) &&
-                !item.isBacking) {
-                var noteSprite =
-                    game.add.sprite(
-                        (1 + startBeats + item.time / beatDivisions) * beatWidthAndPadding,
-                        guitarStringToY[item.note[0]] - 9,
-                        'qNote');
-                noteSprite.scale.setTo((beatWidth / beatIconWidth) * item.beats, 1);
-            }
+    // assign .position
+    var position = 0;
+    var minFret = 100;
+    var maxFret = -1;
+    var piBuffer = [];
+    for (var pix in playItems) {
+        if (playItems[pix].instrument != instrument) {
+            continue;
         }
+        var change = false;
+        do
+        {
+            var minNow = 100;
+            var maxNow = -1;
+            var index = 0;
+            for (var pixi in playItems[pix] || []) {
+                var playItem = playItems[pix][pixi];
+                if (playItem.isBacking) {
+                    continue;
+                }
 
-        var position = 0;
-        var minFret = 100;
-        var maxFret = -1;
-        var piBuffer = [];
-        for (var pix in playItems) {
-            var change = false;
-            do
-            {
-                var minNow = 100;
-                var maxNow = -1;
-                var index = 0;
-                for (var pixi in playItems[pix] || []) {
-                    var playItem = playItems[pix][pixi];
-                    if (playItem.isBacking) {
-                        continue;
-                    }
-
-                    if (Math.max(playItem.note[1], maxFret) - Math.min(playItem.note[1], minFret) > 3) {
-                        if (Math.max(playItem.note[1], maxNow) - Math.min(playItem.note[1], minNow) > 3) {
-                            console.log("too big of a stretch here: " + pix);
-                            playItem.isBacking = true;
-                            continue;
-                        }
-                        else {
-                            change = true;
-                            break;
-                        }
-                    }
-                    if (index >= 2) {
-                        console.log("too many notes: " + pix);
+                if (Math.max(playItem.note[1], maxFret) - Math.min(playItem.note[1], minFret) > 3) {
+                    if (Math.max(playItem.note[1], maxNow) - Math.min(playItem.note[1], minNow) > 3) {
+                        console.log("too big of a stretch here: " + pix);
                         playItem.isBacking = true;
                         continue;
                     }
-
-                    index += 1;
-
-                    if (playItem.note[1] > maxFret) {
-                        maxFret = playItem.note[1];
+                    else {
+                        change = true;
+                        break;
                     }
-                    if (playItem.note[1] < minFret) {
-                        minFret = playItem.note[1];
-                    }
-                    if (playItem.note[1] > maxNow) {
-                        maxNow = playItem.note[1];
-                    }
-                    if (playItem.note[1] < minNow) {
-                        minNow = playItem.note[1];
-                    }
-
-                    position = minFret;
                 }
-                if (change) {
-                    minFret = 100;
-                    maxFret = -1;
-                    for (var ii = 0; ii < piBuffer.length; ++ii) {
-                        piBuffer[ii].position = position;
-                    }
-                    piBuffer = [];
-                    change = false;
+                if (index >= 2) {
+                    console.log("too many notes: " + pix);
+                    playItem.isBacking = true;
                     continue;
                 }
-                else {
-                    piBuffer = piBuffer.concat(playItems[pix]);
-                    change = false;
-                    break;
+
+                index += 1;
+
+                if (playItem.note[1] > maxFret) {
+                    maxFret = playItem.note[1];
                 }
+                if (playItem.note[1] < minFret) {
+                    minFret = playItem.note[1];
+                }
+                if (playItem.note[1] > maxNow) {
+                    maxNow = playItem.note[1];
+                }
+                if (playItem.note[1] < minNow) {
+                    minNow = playItem.note[1];
+                }
+
+                position = minFret;
             }
-            while (true);
+            if (change) {
+                minFret = 100;
+                maxFret = -1;
+                for (var ii = 0; ii < piBuffer.length; ++ii) {
+                    piBuffer[ii].position = position;
+                }
+                piBuffer = [];
+                change = false;
+                continue;
+            }
+            else {
+                piBuffer = piBuffer.concat(playItems[pix]);
+                change = false;
+                break;
+            }
         }
+        while (true);
     }
+
     position = minFret;
     for (var ii = 0; ii < piBuffer.length; ++ii) {
         piBuffer[ii].position = position;
     }
 
-    for (var bix in song.parts.guitar) {
-        var item = song.parts.guitar[bix];
-        item.expectedKey = keyboard2[item.note[0] - 1][item.note[1] - item.position];
+    // create sprites
+    for (var bix in song.parts[instrument]) {
+        var item = song.parts[instrument][bix];
+        if (!item.note) {
+            console.log(item.name);
+            throw new Error();
+        }
+        if (!isNaN(item.note[0]) &&
+            !item.isBacking) {
+            var noteSprite =
+                game.add.sprite(
+                    (1 + startBeats + item.time / beatDivisions) * beatWidthAndPadding,
+                    guitarStringToY[item.note[0]] - 9,
+                    'qNote');
+            noteSprite.scale.setTo((beatWidth / beatIconWidth) * item.beats, 1);
+            item.sprite = noteSprite;
+            item.expectedKey = keyboard2[item.note[0] - 1][item.note[1] - item.position];
+        }
     }
 
     currentBar =
@@ -338,7 +377,7 @@ function create() {
             'currentBar');
 
     currentBar.scale.setTo(2, 2);
-    currentBeat = -startBeats - 1; 
+    currentBeat = -startBeats - 1;
     // DEBUG
     // currentBeat = 0; // TODO: -startBeats-1;
     //game.time.events.loop(
@@ -365,17 +404,18 @@ function create() {
                         if (playItem.isBacking)
                         {
                             (function() {
+                                var inst = playItem.instrument;
                                 var ss = playItem.note[0];
                                 var ff = playItem.note[1];
                                 setTimeout(function() {
                                     var name = stringAndFretToPitch(ss, ff, octaveShiftSamples);
                                     //console.log("Playing backing " + name);
-                                    sounds["guitar"][name].play();
+                                    sounds[inst][name].play();
                                 }, 0);
                             })();
                         }
                         if (!playItem.isBacking) {
-                            currentPosition = playItem.position;
+                            currentPosition = playItem.position || currentPosition;
                             // console.log("Reached " + JSON.stringify(playItem));
                             noteBuffer.push([playItem.note[0], playItem.note[1], currentTime]);
                         }
