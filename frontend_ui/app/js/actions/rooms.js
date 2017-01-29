@@ -7,7 +7,8 @@ import {
     SET_PLAYERS,
     SET_IS_HOST,
     JOIN_ROOM,
-    CHOOSE_INSTRUMENT
+    CHOOSE_INSTRUMENT,
+    ROOM_READY
 } from '../constants/rooms'
 
 export const setUserId = ({ userId }) => ({
@@ -27,6 +28,13 @@ export const chooseInstrument = ({ room, instrumentId, userId }) => ({
     payload: {
         room,
         instrumentId,
+        userId
+    }
+})
+export const roomReady = ({ room, userId }) => ({
+    type: ROOM_READY,
+    payload: {
+        room,
         userId
     }
 })

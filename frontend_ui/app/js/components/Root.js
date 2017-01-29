@@ -12,7 +12,7 @@ import {
 import { NotFound } from '.'
 import getLink from '../utils/getLink'
 import { subscribe } from '../../lib/broker_facade'
-import { setPlayers } from '../actions/rooms'
+import { setPlayers, roomReady } from '../actions/rooms'
 
 export const configureStoreWithBrowserHistory = () => {
     const store = configureStore()
@@ -32,7 +32,7 @@ export const subscribeRoomPartial = roomId => {
             defaultStore.dispatch(setPlayers({ players: data.room.members }))
         }
         if (data.type === 'startGame') {
-            console.info(data)
+            defaultStore.dispatch(roomReady({ room: data.room, userId: defaultStore.getState().rooms.get('userId') }))
             window.location.replace(`http://192.168.111.67:8080?room=${data.room}`)
         }
     })
