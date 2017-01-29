@@ -112,10 +112,23 @@ public class MultiplayerBandController {
 
             String notification = mapper.writeValueAsString(roomReady);
 
-            nChannel channel = nsession.findChannel(new nChannelAttributes("/room/" + roomId));
+            final nChannel channel = nsession.findChannel(new nChannelAttributes("/room/" + roomId));
 
-            nConsumeEvent event = nConsumeEventFactory.create("", notification.getBytes(), -1, false);
-            channel.publish(event);
+            final nConsumeEvent event = nConsumeEventFactory.create("", notification.getBytes(), -1, false);
+
+            Thread thread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        Thread.sleep(10000);
+                        channel.publish(event);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+
+            thread.start();
         }
     }
 
