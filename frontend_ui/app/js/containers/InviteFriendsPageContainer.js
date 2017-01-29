@@ -37,6 +37,12 @@ class InviteFriendsPageContainer extends Component {
         }
     }
 
+    onStartButtonClick = () => {
+        const { push } = this.props
+
+        push('/play')
+    }
+
     render() {
         const { isHost, userId, instrument, room, song, players } = this.props
 
@@ -75,6 +81,18 @@ class InviteFriendsPageContainer extends Component {
                             isHost ?
                                 <div className="url"><span className="join">{'Join'}</span><span className="well">{`http://192.168.111.150:3000/room/${room}`}</span></div>
                                 : null
+                        }
+                        {
+                            isHost ?
+                                <Button
+                                    className="create-button"
+                                    onClick={this.onStartButtonClick}
+                                    disabled={!players.every(player => !!player.instrument)}
+                                    title="Create New Room"
+                                >
+                                    {'Start'}
+                                </Button>
+                                :null
                         }
                     </div>
                     <ul className="workflow">
