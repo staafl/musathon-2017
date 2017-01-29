@@ -8,7 +8,7 @@ const defaults = {
     timeout: 100000
 }
 
-const BASE_URL = process.env.API_URL
+const BASE_URL = process.env.API_URL + ':8080'
 
 const servicesDesc = [
     {

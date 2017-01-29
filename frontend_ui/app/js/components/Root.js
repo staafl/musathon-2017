@@ -11,6 +11,8 @@ import {
 } from '../containers'
 import { NotFound } from '.'
 import getLink from '../utils/getLink'
+import { subscribe } from '../../lib/broker_facade'
+import { setPlayers } from '../actions/rooms'
 
 export const configureStoreWithBrowserHistory = () => {
     const store = configureStore()
@@ -21,6 +23,17 @@ export const configureStoreWithBrowserHistory = () => {
 }
 
 export const defaultStore = configureStoreWithBrowserHistory()
+
+export const subscribeRoomPartial = roomId => {
+    subscribe(`/room/${roomId}`, function(event){
+        const data = JSON.parse(event.getData())
+
+        if (data.type === 'joinedRoom' || data.type === 'instrumentChosen') {
+            defaultStore.dispatch(setPlayers({ players: data.room.members }))
+        }
+        console.log(JSON.parse(event.getData()))
+    })
+}
 
 export const createRoot = (store = defaultStore, name = 'Root') => {
     class Root extends Component {

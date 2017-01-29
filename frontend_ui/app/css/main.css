@@ -184,7 +184,7 @@ ul.workflow > li .fa {
 }
 
 .invite-players .url {
-    margin: 150px;
+    margin-top: 150px;
 }
 
 .well {
@@ -198,3 +198,4 @@ ul.workflow > li .fa {
     position: relative;
     top: 5px;
 }
+

@@ -46,8 +46,9 @@ class InviteFriendsPageContainer extends Component {
 
         return (
             <div className="invite-players">
-                <main>
+                <main className="room">
                     <div className="players">
+                        <div className="join">Players: </div>
                         <div className="player player-self">
                             <span className="player-name">{`${userId} (Player)`}</span>
                             <Select
@@ -57,13 +58,7 @@ class InviteFriendsPageContainer extends Component {
                                 options={
                                     mapValuesToMultiSelectOptions(ALBUMS[song]['instruments']
                                             .filter(instrument => {
-                                                return !players.some(player => player.instrument === instrument)
-                                            })
-                                            // This is hardcode
-                                            .map(instrument => {
-                                                if (instrument) {
-                                                    return instrument
-                                                }
+                                                return !players.some(player => player.id !== userId && player.instrument === instrument)
                                             })
                                     )
                                 }
@@ -76,12 +71,12 @@ class InviteFriendsPageContainer extends Component {
                                         <div className="player" key={player.id}>{`${player.id} - ${player.instrument ? player.instrument : ''}`}</div>
                                     )
                         }
+                        {
+                            isHost ?
+                                <div className="url"><span className="join">{'Join'}</span><span className="well">{`http://192.168.111.150:3000/room/${room}`}</span></div>
+                                : null
+                        }
                     </div>
-                    {
-                        isHost ?
-                            <div className="url"><span className="join">{'Join'}</span><span className="well">{`http://192.168.111.150:3000/room/${room}`}</span></div>
-                            : null
-                    }
                     <ul className="workflow">
                         <li className=""><i className="fa fa-music" />{'1. Choose song'}</li>
                         <li className="primary"><i className="fa fa-users" />{'2. Invite Friends'}</li>

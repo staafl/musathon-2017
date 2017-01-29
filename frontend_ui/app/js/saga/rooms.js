@@ -14,6 +14,7 @@ import { handleSagaError } from './utils'
 import { createRoom } from '../utils/services'
 import { push } from 'react-router-redux'
 import getLink from '../utils/getLink'
+import { subscribeRoomPartial } from '../components/Root'
 
 function* onCreateRoom({ payload: { id: songId } }) {
     try {
@@ -27,6 +28,7 @@ function* onCreateRoom({ payload: { id: songId } }) {
         yield put(setIsHost({ isHost: true }))
         yield put(setRoomId({ roomId: id }))
 
+        subscribeRoomPartial(id)
         yield put(push(`${getLink('room')}/${id}`))
     } catch (error) {
         yield call(handleSagaError, { error })
@@ -39,16 +41,25 @@ function* onJoinRoom({ payload: { room } }) {
     try {
         yield put(startLoading({ loader: CREATE_ROOM_IS_LOADING }))
 
-        const { room: { id, members }, userId } = yield call(createRoom, { data: { id: `${room}/join` } })
+        const data = yield call(createRoom, { data: { id: `${room}/join` } })
+
+        if (data.failed === true) {
+            throw new Error('Sorry you cant join. Room is already full. Very sorry, mister.')
+        }
+        const { room: { id, members }, userId } = data
 
         yield put(setSongId({ songId: 0 }))
         yield put(setUserId({ userId }))
         yield put(setPlayers({ players: members }))
         yield put(setRoomId({ roomId: id }))
 
+        subscribeRoomPartial(id)
+
         yield put(push(`${getLink('room')}/${id}`))
     } catch (error) {
         yield call(handleSagaError, { error })
+
+        yield put(push(getLink('home')))
     } finally {
         yield put(stopLoading({ loader: CREATE_ROOM_IS_LOADING }))
     }
