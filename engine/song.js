@@ -1,9 +1,9 @@
 var song = {
   name: "Under The Bridge",
-  duration: 322,
+  duration: 50, // 322,
   backingTrack: "songs/under-the-bridge.mp3",
   previewTrack: "preview/under-the-bridge-preview.mp3",
-  tempo: 100,
+  tempo: 45,
   beatsPerMeasure: 4,
   parts:  {
     guitar: 

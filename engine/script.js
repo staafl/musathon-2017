@@ -16,7 +16,7 @@ var beatWidth = 100;
 var startBeats = 1 * song.beatsPerMeasure;
 var totalBeatsIncludingStart = (startBeats + song.duration) * song.tempo / 60;
 var beatWidthAndPadding = 128;
-var totalWidth = (1 + totalBeatsIncludingStart) * beatWidthAndPadding;
+var totalWidth = (1 + totalBeatsIncludingStart) * beatWidthAndPadding + 2*screen.width;
 var updatesPerBeat = 128;
 var beatDivisions = 16;
 var click;
@@ -133,7 +133,7 @@ function create() {
 
     time = 0;
 
-    while (time < totalBeatsIncludingStart) {
+    while (time < totalBeatsIncludingStart + song.beatsPerMeasure) {
 
         if (time % song.beatsPerMeasure == 0) {
             var measureBar =
@@ -177,7 +177,7 @@ function create() {
             'currentBar');
 
     currentBar.scale.setTo(2, 2);
-    currentBeat = -startBeats;
+    currentBeat = -startBeats-1;
     //game.time.events.loop(
         //(60000 / song.tempo) /* duration of beat in ms */ / (2 * updatesPerBeat));
     setInterval(
@@ -185,11 +185,14 @@ function create() {
             var mod = cycle % updatesPerBeat;
             if (mod % updatesPerBeat == 0) {
                 currentBeat += 1;
+                // console.log("currentBeat: " + currentBeat);
                 setTimeout(onBeat, 0);
             }
             if (mod % (updatesPerBeat / beatDivisions) == 0) {
                 
-                var playItem = playItems[cycle / beatDivisions];
+                var time = cycle / (updatesPerBeat / beatDivisions) - beatDivisions*startBeats;
+                // console.log("current time: " + time);
+                var playItem = playItems[time];
                 if (playItem) {
                     setTimeout(function() {
                         var note = playItem.note;
@@ -213,7 +216,6 @@ var cycle = 0;
 
 function onBeat()
 {
-    console.log("currentBeat: " + currentBeat);
     if (currentBeat % 1 == 0) {
         click.play();
     }
