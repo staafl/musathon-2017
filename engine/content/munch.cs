@@ -73,7 +73,8 @@ class Program
                     {
                         int fret, s;
                         PitchToStringAndFret(right, out s, out fret);
-                        Console.WriteLine($"    note: [{s}, {fret}], // " + line.Trim());
+                        Console.WriteLine(line);
+                        // Console.WriteLine($"    note: [{s}, {fret}], // " + line.Trim());
                         continue;
                     }
                     if (left == "time")

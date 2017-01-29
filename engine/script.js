@@ -22,10 +22,26 @@ var beatDivisions = 16;
 var click;
 var currentBeat;
 var currentBar;
+var currentTime;
 var notes;
 var playItems = {};
 var sounds = {};
-var defaultOctaveShift = 0;
+var defaultOctaveShift = -1;
+var currentPosition = 0;
+var allPitches = [];
+var bufferDelay = 10;
+var keyboard =
+    [
+        [Phaser.Keyboard.ONE,Phaser.Keyboard.Q,Phaser.Keyboard.A,Phaser.Keyboard.Z],
+        [Phaser.Keyboard.TWO,Phaser.Keyboard.W,Phaser.Keyboard.S,Phaser.Keyboard.X],
+        [Phaser.Keyboard.THREE,Phaser.Keyboard.E,Phaser.Keyboard.D,Phaser.Keyboard.C],
+        [Phaser.Keyboard.FOUR,Phaser.Keyboard.R,Phaser.Keyboard.F,Phaser.Keyboard.V],
+        [Phaser.Keyboard.FIVE,Phaser.Keyboard.T,Phaser.Keyboard.G,Phaser.Keyboard.B],
+        [Phaser.Keyboard.SIX,Phaser.Keyboard.Y,Phaser.Keyboard.H,Phaser.Keyboard.N],
+    ];
+
+var keyBuffer = [];
+var noteBuffer = [];
 
 var guitarStringToY =
 {
@@ -37,16 +53,27 @@ var guitarStringToY =
     6: 570
 };
 
-function pitchToStringAndFret(p)
+function pitchToStringAndFret(p, Shift)
 {
-    for (var pos = 0; pos <= 16; pos += 4)
-    for (var ii = 1; ii <= 6; ++ii) {
+    var pos = 0;
+//    for (var ii = 1; ii <= 6; ++ii) {
+//        for (var f = 0; f <= 4; ++f) {
+//            if (stringAndFretToPitch(ii, f + pos) == p) {
+//                return [ii, f];
+//            }
+//        }
+//    }
+    for (var pos = 0; pos <= 24; pos += 4)
+        for (var ii = 1; ii <= 6; ++ii) {
         for (var f = 0; f <= 4; ++f) {
-            if (stringAndFretToPitch(ii, f + pos) == p) {
+            if (stringAndFretToPitch(ii, f + pos, Shift == undefined ? defaultOctaveShift : Shift) == p) {
+                // console.log("Resolving " + p + " as " + JSON.stringify([ii, f]));
                 return [ii, f];
             }
         }
     }
+    console.log(p);
+    throw new Exception();
     return null;
 }
 
@@ -57,7 +84,7 @@ function stringAndFretToPitch(s, f, a)
     var stringOctave = [4, 3, 3, 3, 2, 2];
     var indexOf = notes.indexOf(strings[s - 1]);
     var toReturn = notes[(indexOf + f) % notes.length];
-    toReturn += (stringOctave[s-1] + Math.floor((f + indexOf) / 12) + (a || defaultOctaveShift));
+    toReturn += (stringOctave[s-1] + Math.floor((f + indexOf) / 12) + (a == undefined ? defaultOctaveShift : 0));
     return toReturn;
 }
 
@@ -76,11 +103,22 @@ function preload() {
 
     // todo: slip loading samples we won't need
     if (instrument = "guitar") {
+        var notesToAdd = {};
         for (var s = 1; s <= 6; ++s) {
-            for (var f = 0; f <= 5; ++f) {
-                var name = stringAndFretToPitch(s, f, -1);
-                game.load.audio(name, 'samples/xt/' + name.replace("#", "%23") + '.wav');
+            for (var f = 0; f <= 10; ++f) {
+                console.log(stringAndFretToPitch(s, f, defaultOctaveShift));
+                notesToAdd[stringAndFretToPitch(s, f, defaultOctaveShift)] = true;;
             }
+        }
+        for (var f = 6; f <= 20; ++f) {
+            notesToAdd[stringAndFretToPitch(1, f, defaultOctaveShift)] = true;;
+        }
+        notesToAdd = Object.keys(notesToAdd);
+        for (var n in Object.keys(notesToAdd)) {
+            var name = notesToAdd[n];
+            console.log("Loading " + name);
+            allPitches.push(name);
+            game.load.audio(name, 'samples/xt/' + name.replace("#", "%23") + '.wav');
         }
     }
 }
@@ -117,6 +155,15 @@ function addGuitarString(number) {
 
 }
 
+function handleKey(s, f) {
+    // console.log(name);
+    // console.log("Key: " + JSON.stringify([s, currentPosition + f, currentTime]));
+    keyBuffer.push([s, currentPosition + f, currentTime]);
+    var name = stringAndFretToPitch(s, currentPosition + f);
+    sounds["guitar"][name].play();
+    matchBuffers();
+}
+
 function create() {
 
     click = game.add.audio('woodclick');
@@ -127,6 +174,18 @@ function create() {
         totalWidth,
         screen.height,
         'sky');
+
+    for (var sIx in keyboard) {
+        for (var fIx in keyboard[sIx]) {
+            (function() {
+                var sIx1 = 1 + parseInt(sIx);
+                var fIx1 = parseInt(fIx);
+                game.input.keyboard.addKey(keyboard[sIx][fIx]).onDown.add(function() {
+                    handleKey(sIx1, fIx1);
+                }, this);
+            })();
+        }
+    }
 
     for (var ii = 0; ii < 6; ++ii) {
         addGuitarString(ii + 1);
@@ -148,11 +207,8 @@ function create() {
     }
 
     sounds["guitar"] = {};
-    for (var s = 1; s <= 6; ++s) {
-        for (var f = 0; f <= 5; ++f) {
-            var name = stringAndFretToPitch(s, f, -1);
-            sounds["guitar"][name] = game.add.audio(name);
-        }
+    for (var ix in allPitches) {
+        sounds["guitar"][allPitches[ix]] = game.add.audio(allPitches[ix]);
     }
 
     if (instrument = "guitar") {
@@ -162,11 +218,14 @@ function create() {
             playItems[item.time].push(item);
             var name = item.name;
             // console.log(name);
-            item.note = pitchToStringAndFret(name);
+            item.note = pitchToStringAndFret(name, -1);
         }
 
         for (var bix in song.parts.guitar) {
             var item = song.parts.guitar[bix];
+            if (!item.note) {
+                console.log(item.name);
+            }
             if (!isNaN(item.note[0]) &&
                 !item.isBacking) {
                 var noteSprite =
@@ -211,7 +270,7 @@ function create() {
                         playItem.isBacking = true;
                         continue;
                     }
-                    
+
                     index += 1;
 
                     if (playItem.note[1] > maxFret) {
@@ -273,22 +332,20 @@ function create() {
             }
             if (mod % (updatesPerBeat / beatDivisions) == 0) {
 
-                var time = cycle / (updatesPerBeat / beatDivisions) - beatDivisions*startBeats;
-                // console.log("current time: " + time);
-                (function() {
-                    var playItemsNow = playItems[time];
-                    if (playItemsNow) {
-                        setTimeout(function() {
-                            for (var ii = 0; ii < playItemsNow.length; ++ii) {
-                                var playItem = playItemsNow[ii];
-                                var note = playItem.note;
-                                var name = stringAndFretToPitch(note[0], note[1], -1);
-                                // console.log(name);
-                                sounds["guitar"][name].play();
-                            }
-                        }, 0);
-                    }
-                })();
+                  currentTime = cycle / (updatesPerBeat / beatDivisions) - beatDivisions*startBeats;
+//console.log("current time: " + currentTime);
+    
+                  var playItemsNow = playItems[currentTime];
+                  if (playItemsNow) {
+                      // console.log(playItemsNow);
+                      for (var ii = 0; ii < playItemsNow.length; ++ii) {
+                        var playItem = playItemsNow[ii];
+                        currentPosition = playItem.position;
+                        // console.log("Reached " + JSON.stringify(playItem));
+                        noteBuffer.push([playItem.note[0], playItem.note[1], currentTime]);
+                      }
+                  }
+                  matchBuffers();
             }
             game.camera.x += beatWidthAndPadding / updatesPerBeat;
             if (currentBar)
@@ -299,6 +356,54 @@ function create() {
 
         //true);
 }
+function matchBuffers() {
+    for (var ii = keyBuffer.length - 1; ii >= 0; ii--) {
+        if (currentTime - keyBuffer[ii][2] > bufferDelay) {
+            console.log("Extra key: " + JSON.stringify(keyBuffer[ii]));
+            keyBuffer.splice(ii, 1);
+        }
+    }
+
+    for (var ii = noteBuffer.length - 1; ii >= 0; ii--) {
+        if (currentTime - noteBuffer[ii][2] > bufferDelay) {
+            console.log("Missed note: " + JSON.stringify(noteBuffer[ii]));
+            noteBuffer.splice(ii, 1);
+        }
+    }
+
+    for (var ii = noteBuffer.length - 1; ii >= 0; ii--) {
+    for (var jj = keyBuffer.length - 1; jj >= 0; jj--) {
+        if (keyBuffer[jj][0] == noteBuffer[ii][0] &&
+            keyBuffer[jj][0] == noteBuffer[ii][0]) {
+            console.log("Matched " + JSON.stringify(keyBuffer[jj]));
+            keyBuffer.splice(jj, 1);
+            noteBuffer.splice(ii, 1);
+            break;
+        }
+    }
+    }
+}
+
+////                                currentPosition = playItem.currentPosition;
+////                                var playItem = playItemsNow[ii];
+////                                var note = playItem.note;
+////                                var name = stringAndFretToPitch(note[0], note[1], -1);
+////                                var isHit = false;
+////                                notesBuffer.push(playItem);
+//    for (var keyIx in keyBuffer) {
+//        var key = keyBuffer[keyIx];
+//        if (key.column == note[0] &&
+//            key.row = note[1] - playItem.position) {
+//            console.log("Hit: " + name);
+//            isHit = true;
+//            break;
+//        }
+
+//        if (!isHit) {
+//            sounds["guitar"][name].play();
+//        }
+//    }
+//}
 var cycle = 0;
 
 function onBeat()
