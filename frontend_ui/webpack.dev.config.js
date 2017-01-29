@@ -82,7 +82,7 @@ module.exports = {
         new webpack.DefinePlugin({
             'process.env': {
                 NODE_ENV: JSON.stringify('development'),
-                API_URL: JSON.stringify('http://192.168.111.21:8080'),
+                API_URL: JSON.stringify('http://192.168.111.22'),
                 HOST_URL: JSON.stringify('/')
             }
         }),

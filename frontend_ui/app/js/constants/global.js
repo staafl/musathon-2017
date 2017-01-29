@@ -16,7 +16,6 @@ export const ALBUMS = [
         alt: '',
         instruments: [
             'guitar',
-            'guitar',
             'bass-guitar'
         ]
     },
@@ -27,7 +26,6 @@ export const ALBUMS = [
         author: 'Justin Beiber',
         alt: '',
         instruments: [
-            'guitar',
             'guitar',
             'bass-guitar'
         ]
@@ -40,7 +38,6 @@ export const ALBUMS = [
         alt: '',
         instruments: [
             'guitar',
-            'guitar',
             'bass-guitar'
         ]
     },
@@ -51,7 +48,6 @@ export const ALBUMS = [
         author: 'Justin Beiber',
         alt: '',
         instruments: [
-            'guitar',
             'guitar',
             'bass-guitar'
         ]
@@ -64,7 +60,6 @@ export const ALBUMS = [
         alt: '',
         instruments: [
             'guitar',
-            'guitar',
             'bass-guitar'
         ]
     },
@@ -75,7 +70,6 @@ export const ALBUMS = [
         author: 'Justin Beiber',
         alt: '',
         instruments: [
-            'guitar',
             'guitar',
             'bass-guitar'
         ]
