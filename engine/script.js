@@ -340,9 +340,21 @@ function create() {
                       // console.log(playItemsNow);
                       for (var ii = 0; ii < playItemsNow.length; ++ii) {
                         var playItem = playItemsNow[ii];
-                        currentPosition = playItem.position;
-                        // console.log("Reached " + JSON.stringify(playItem));
-                        noteBuffer.push([playItem.note[0], playItem.note[1], currentTime]);
+                        if (playItem.isBacking) {
+                            (function() {
+                                var ss = playItem.note[0];
+                                var ff = playItem.note[1];
+                                setTimeout(function() {
+                                    var name = stringAndFretToPitch(ss, ff);
+                                    sounds["guitar"][name].play();                                
+                                }, 0);
+                            })();
+                        }
+                        else {
+                            currentPosition = playItem.position;
+                            // console.log("Reached " + JSON.stringify(playItem));
+                            noteBuffer.push([playItem.note[0], playItem.note[1], currentTime]);
+                        }
                       }
                   }
                   matchBuffers();
@@ -376,6 +388,7 @@ function matchBuffers() {
         if (keyBuffer[jj][0] == noteBuffer[ii][0] &&
             keyBuffer[jj][0] == noteBuffer[ii][0]) {
             console.log("Matched " + JSON.stringify(keyBuffer[jj]));
+            // matchedTimes.push(noteBuffer[ii][2]);
             keyBuffer.splice(jj, 1);
             noteBuffer.splice(ii, 1);
             break;

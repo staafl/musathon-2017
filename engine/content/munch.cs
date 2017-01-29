@@ -56,6 +56,7 @@ class Program
                     if (line == "        }," ||
                         line == "        }")
                     {
+                        Console.WriteLine("    isBacking: false,");
                         break;
                     }
                     var match = Regex.Match(line, "\"([^\"]+)\": \"?([^\",]+)\"?,?");
